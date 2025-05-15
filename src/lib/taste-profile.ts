@@ -109,12 +109,10 @@ export class TasteProfiler {
         currentProfile.cookingStyles, 
         [newMealOrder.cuisineStyle[0]]
       ),
-      dietaryRestrictions: [
-        ...new Set([
-          ...currentProfile.dietaryRestrictions, 
-          ...(newMealOrder.dietaryPreferences || [])
-        ])
-      ]
+      dietaryRestrictions: Array.from(new Set([
+        ...currentProfile.dietaryRestrictions, 
+        ...(newMealOrder.dietaryPreferences || [])
+      ]))
     };
   }
 

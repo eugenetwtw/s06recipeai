@@ -172,11 +172,13 @@ export class CookwareIntelligence {
   // Example workflow demonstrating full capability
   async cookwareAdaptationWorkflow(userId: string) {
     // 1. Retrieve user's cookware inventory
-    const { data: { cookware_inventory } } = await this.supabase
+    const { data } = await this.supabase
       .from('user_cookware')
       .select('cookware_inventory')
       .eq('user_id', userId)
       .single();
+
+    const cookware_inventory = (data?.cookware_inventory as CookwareStatus[]) || [];
 
     // 2. Identify broken cookware
     const brokenCookware = cookware_inventory.filter(

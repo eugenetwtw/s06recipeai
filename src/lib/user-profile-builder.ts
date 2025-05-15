@@ -190,31 +190,40 @@ export class UserProfileBuilder {
       .single();
 
     // Modify profile
-    let updatedProfile = { ...currentProfile };
+    let updatedProfile = currentProfile as unknown as UserCulinaryProfile;
+    if (!currentProfile) {
+      throw new Error('No profile found to update');
+    }
     
     switch(itemType) {
       case 'cookware':
-        delete updatedProfile.cookware[itemKey];
+        if (updatedProfile.cookware) {
+          delete updatedProfile.cookware[itemKey];
+        }
         break;
       case 'orderHistory':
-        updatedProfile.orderHistory.platformOrders = 
-          updatedProfile.orderHistory.platformOrders.filter(
-            order => order.dishes.some(dish => dish.name !== itemKey)
-          );
+        if (updatedProfile.orderHistory && updatedProfile.orderHistory.platformOrders) {
+          updatedProfile.orderHistory.platformOrders = 
+            updatedProfile.orderHistory.platformOrders.filter(
+              order => order.dishes.some(dish => dish.name !== itemKey)
+            );
+        }
         break;
       case 'foodPreferences':
-        // Example: remove a cuisine type
-        updatedProfile.foodPreferences.cuisineTypes = 
-          updatedProfile.foodPreferences.cuisineTypes.filter(
-            cuisine => cuisine !== itemKey
-          );
+        if (updatedProfile.foodPreferences && updatedProfile.foodPreferences.cuisineTypes) {
+          // Example: remove a cuisine type
+          updatedProfile.foodPreferences.cuisineTypes = 
+            updatedProfile.foodPreferences.cuisineTypes.filter(
+              cuisine => cuisine !== itemKey
+            );
+        }
         break;
     }
 
     // Update profile in database
     await this.supabase
       .from('user_culinary_profiles')
-      .update(updatedProfile)
+      .update(updatedProfile as any)
       .eq('user_id', userId);
 
     return updatedProfile;
@@ -229,18 +238,22 @@ export class UserProfileBuilder {
       .eq('user_id', userId)
       .single();
 
+    if (!profile) {
+      throw new Error('No profile found for user');
+    }
+
     // Construct detailed prompt for recipe generation
     return `
       Generate a personalized recipe based on user profile:
 
       Cookware Available:
-      ${JSON.stringify(profile.cookware)}
+      ${JSON.stringify(profile.cookware || {})}
 
       Food Preferences:
-      ${JSON.stringify(profile.foodPreferences)}
+      ${JSON.stringify(profile.foodPreferences || {})}
 
       Recent Order History:
-      ${JSON.stringify(profile.orderHistory)}
+      ${JSON.stringify(profile.orderHistory || {})}
 
       Requirements:
       1. Use available cookware

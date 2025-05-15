@@ -39,7 +39,7 @@ export class RecipeLearningEngine {
     // Save feedback to database
     const { error } = await this.supabase
       .from('recipe_feedback')
-      .insert(feedback);
+      .insert(feedback as any);
 
     if (error) {
       console.error('Feedback collection error:', error);
