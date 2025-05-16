@@ -52,7 +52,7 @@ export default function SignIn() {
     setLoading(true);
     setError(null);
     try {
-      const redirectUrl = window.location.origin.includes('localhost') ? 'https://s06recipeai.vercel.app/recipe-generator' : `${window.location.origin}/recipe-generator`;
+      const redirectUrl = 'https://s06recipeai.vercel.app/recipe-generator';
       console.log("Redirecting to:", redirectUrl);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
