@@ -31,12 +31,18 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Get the user ID from the current session
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user?.id) {
+    // Get the session token from cookies
+    const sessionToken = request.cookies.get('supabase-auth-token')?.value;
+    if (!sessionToken) {
       return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
     }
-    const userId = session.user.id;
+
+    // Use the session token to get user data
+    const { data: { user } } = await supabase.auth.getUser(sessionToken);
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
+    }
+    const userId = user.id;
     
     // Parse and structure recipe data
     const recipeData = {

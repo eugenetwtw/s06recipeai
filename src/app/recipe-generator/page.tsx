@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 type DietaryPreferences = {
   vegetarian?: boolean;
@@ -26,7 +27,7 @@ export default function RecipeGeneratorPage() {
     setIngredients(prev => prev.filter(ing => ing !== ingredientToRemove));
   };
 
-  const generateRecipe = async () => {
+    const generateRecipe = async () => {
     if (ingredients.length === 0) {
       alert('Please add at least one ingredient');
       return;
@@ -43,11 +44,13 @@ export default function RecipeGeneratorPage() {
     };
 
     try {
+      // Use Supabase client to make an authenticated request
       const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Ensure cookies are sent with the request
         body: JSON.stringify({
           ingredients,
           refrigeratorContents: [], // TODO: Implement actual contents
