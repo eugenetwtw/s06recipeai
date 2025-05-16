@@ -16,7 +16,7 @@ export default function Home() {
   const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
   const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [recipeHistoryData, setRecipeHistoryData] = useState<any[]>([]);
 
   useEffect(() => {
     // Fetch current session
@@ -38,7 +38,7 @@ export default function Home() {
         setRefrigeratorData([]);
         setKitchenToolsData([]);
         setMealHistoryData([]);
-        setProfileData(null);
+        setRecipeHistoryData([]);
       }
     });
     return () => {
@@ -84,17 +84,18 @@ export default function Home() {
         setMealHistoryData(mealData || []);
       }
 
-      // Fetch user culinary profile
-      const { data: profile, error: profileError } = await supabase
-        .from('user_culinary_profiles')
-        .select('*')
+      // Fetch generated recipe history (last 5)
+      const { data: recipeData, error: recipeError } = await supabase
+        .from('generated_recipes')
+        .select('recipe_name, generated_at')
         .eq('user_id', userId)
-        .single();
-      if (profileError) {
-        console.error('Error fetching culinary profile data:', profileError);
-        setProfileData(null);
+        .order('generated_at', { ascending: false })
+        .limit(5);
+      if (recipeError) {
+        console.error('Error fetching recipe history data:', recipeError);
+        setRecipeHistoryData([]);
       } else {
-        setProfileData(profile || null);
+        setRecipeHistoryData(recipeData || []);
       }
     } catch (error) {
       console.error('Unexpected error fetching user data:', error);
@@ -272,24 +273,18 @@ export default function Home() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Culinary Profile</h2>
-              {profileData ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium text-lg">Cookware:</h3>
-                    <pre className="text-sm text-gray-600">{JSON.stringify(profileData.cookware || {}, null, 2)}</pre>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Food Preferences:</h3>
-                    <pre className="text-sm text-gray-600">{JSON.stringify(profileData.foodPreferences || {}, null, 2)}</pre>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Order History:</h3>
-                    <pre className="text-sm text-gray-600">{JSON.stringify(profileData.orderHistory || {}, null, 2)}</pre>
-                  </div>
-                </div>
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Generated Recipe History</h2>
+              {recipeHistoryData.length > 0 ? (
+                <ul className="space-y-2">
+                  {recipeHistoryData.map((recipe, index) => (
+                    <li key={index} className="border-b pb-2">
+                      <p className="font-medium">{recipe.recipe_name}</p>
+                      <p className="text-sm text-gray-500">Generated on: {new Date(recipe.generated_at).toLocaleDateString()}</p>
+                    </li>
+                  ))}
+                </ul>
               ) : (
-                <p className="text-gray-600">No culinary profile data available yet.</p>
+                <p className="text-gray-600">No generated recipes yet.</p>
               )}
             </div>
           </div>
