@@ -31,9 +31,16 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Get the user ID from the current session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
+    }
+    const userId = session.user.id;
+    
     // Parse and structure recipe data
     const recipeData = {
-      user_id: 'anonymous', // Using 'anonymous' instead of userId
+      user_id: userId,
       recipe_name: recipeContent?.match(/^([^\n]+)/)?.[1] || 'Unnamed Recipe',
       ingredients: ingredients,
       instructions: recipeContent,

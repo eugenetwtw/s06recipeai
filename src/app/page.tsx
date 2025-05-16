@@ -13,22 +13,73 @@ export default function Home() {
   const [uploadType, setUploadType] = useState<string>('refrigerator');
   const [user, setUser] = useState<any>(null);
 
+  const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
+  const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
+  const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
+  const [profileData, setProfileData] = useState<any>(null);
+
   useEffect(() => {
     // Fetch current session
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      }
     };
     getSession();
 
     // Listen for auth changes (e.g., sign in/out in another tab)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      } else {
+        setRefrigeratorData([]);
+        setKitchenToolsData([]);
+        setMealHistoryData([]);
+        setProfileData(null);
+      }
     });
     return () => {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  const fetchUserData = async (userId: string) => {
+    try {
+      // Fetch refrigerator contents
+      const { data: fridgeData } = await supabase
+        .from('refrigerator_contents')
+        .select('*')
+        .eq('user_id', userId);
+      setRefrigeratorData(fridgeData || []);
+
+      // Fetch kitchen tools
+      const { data: toolsData } = await supabase
+        .from('kitchen_tools')
+        .select('*')
+        .eq('user_id', userId);
+      setKitchenToolsData(toolsData || []);
+
+      // Fetch meal history
+      const { data: mealData } = await supabase
+        .from('meal_history')
+        .select('*')
+        .eq('user_id', userId);
+      setMealHistoryData(mealData || []);
+
+      // Fetch user culinary profile
+      const { data: profile } = await supabase
+        .from('user_culinary_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      setProfileData(profile || null);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -50,6 +101,10 @@ export default function Home() {
       });
       const result = await response.json();
       console.log(result);
+      // Refresh data after successful upload
+      if (user) {
+        fetchUserData(user.id);
+      }
     } catch (error) {
       console.error('Upload failed', error);
     }
@@ -136,6 +191,79 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        {user && (
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Refrigerator Contents</h2>
+              {refrigeratorData.length > 0 ? (
+                <ul className="space-y-2">
+                  {refrigeratorData.map((item, index) => (
+                    <li key={index} className="border-b pb-2">
+                      <p className="font-medium">Image: <a href={item.image_url} target="_blank" className="text-indigo-500 underline">{item.image_url}</a></p>
+                      <p className="text-sm text-gray-600">Ingredients: {JSON.stringify(item.detected_ingredients, null, 2)}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">No refrigerator data uploaded yet.</p>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Kitchen Tools</h2>
+              {kitchenToolsData.length > 0 ? (
+                <ul className="space-y-2">
+                  {kitchenToolsData.map((item, index) => (
+                    <li key={index} className="border-b pb-2">
+                      <p className="font-medium">Image: <a href={item.image_url} target="_blank" className="text-indigo-500 underline">{item.image_url}</a></p>
+                      <p className="text-sm text-gray-600">Tools: {JSON.stringify(item.detected_tools, null, 2)}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">No kitchen tools data uploaded yet.</p>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Meal History</h2>
+              {mealHistoryData.length > 0 ? (
+                <ul className="space-y-2">
+                  {mealHistoryData.map((item, index) => (
+                    <li key={index} className="border-b pb-2">
+                      <p className="font-medium">Image: <a href={item.image_url} target="_blank" className="text-indigo-500 underline">{item.image_url}</a></p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">No meal history data uploaded yet.</p>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Culinary Profile</h2>
+              {profileData ? (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-lg">Cookware:</h3>
+                    <pre className="text-sm text-gray-600">{JSON.stringify(profileData.cookware || {}, null, 2)}</pre>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Food Preferences:</h3>
+                    <pre className="text-sm text-gray-600">{JSON.stringify(profileData.foodPreferences || {}, null, 2)}</pre>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Order History:</h3>
+                    <pre className="text-sm text-gray-600">{JSON.stringify(profileData.orderHistory || {}, null, 2)}</pre>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-600">No culinary profile data available yet.</p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

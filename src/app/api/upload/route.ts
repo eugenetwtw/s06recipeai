@@ -12,8 +12,14 @@ const openai = new OpenAI({
 });
 
 export async function POST(request: NextRequest) {
-  const userId = 'anonymous'; // Using 'anonymous' instead of userId from auth
-
+  // Get the user ID from the current session
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
+  }
+  
+  const userId = session.user.id;
   const formData = await request.formData();
   const file = formData.get('file') as File;
   const uploadType = formData.get('type') as string;

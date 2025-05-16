@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { OpenAIService } from '@/lib/openai-config';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,9 +17,16 @@ export async function POST(request: NextRequest) {
 
     const analysisResult = await OpenAIService.analyzeImage(imageUrl);
 
+    // Get the user ID from the current session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
+    }
+    const userId = session.user.id;
+    
     return NextResponse.json({ 
       analysis: analysisResult,
-      userId: 'anonymous' // Using 'anonymous' instead of userId
+      userId: userId
     });
   } catch (error) {
     console.error('Image Analysis API Error:', error);
