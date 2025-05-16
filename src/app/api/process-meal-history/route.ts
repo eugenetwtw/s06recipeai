@@ -42,15 +42,28 @@ export async function POST(request: NextRequest) {
 
     const mealData = JSON.parse(response.choices[0].message.content || '{}');
 
-    // Save to Supabase - store the meal data in the detected_ingredients field
-    // since the meal_history table doesn't have an order_details column
-    const mealDataString = JSON.stringify(mealData);
-    
+    // Generate a natural language summary using OpenAI
+    const summaryPrompt = `
+      Write a concise, natural language summary of the following meal order JSON for a user-facing meal history log. 
+      Focus on making it readable and friendly. Here is the JSON:
+      ${JSON.stringify(mealData, null, 2)}
+    `;
+
+    const summaryResponse = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: summaryPrompt }],
+      max_tokens: 120,
+    });
+
+    const naturalLanguageSummary = summaryResponse.choices[0].message.content?.trim() || '';
+
+    // Save to Supabase - store the meal data and the summary
     const { data, error } = await supabase
       .from('meal_history')
       .insert({
         user_id: userId,
-        detected_ingredients: mealData // Using detected_ingredients as a temporary field for meal data
+        detected_ingredients: mealData, // Using detected_ingredients as a temporary field for meal data
+        natural_language_summary: naturalLanguageSummary
       });
 
     if (error) {
@@ -60,7 +73,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Meal history processed successfully',
-      data: mealData
+      data: mealData,
+      summary: naturalLanguageSummary
     });
   } catch (error) {
     console.error('Error processing meal history:', error);

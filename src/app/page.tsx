@@ -355,7 +355,11 @@ export default function Home() {
                         </p>
                       )}
                       
-                      {item.detected_ingredients && (
+                      {item.natural_language_summary ? (
+                        <div className="text-sm italic text-gray-800 mb-2">
+                          {item.natural_language_summary}
+                        </div>
+                      ) : item.detected_ingredients && (
                         <div className="text-sm">
                           {item.detected_ingredients.restaurant_name && (
                             <p className="font-bold text-indigo-600">{item.detected_ingredients.restaurant_name}</p>
