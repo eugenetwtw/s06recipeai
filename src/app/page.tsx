@@ -220,35 +220,6 @@ export default function Home() {
         </header>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-          {/* --- Marketing Section: Eye-catching, benefit-driven --- */}
-          <section className="w-full my-12 flex flex-col items-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-pink-600 mb-4">AI 智能料理，讓生活更美好！</h2>
-            <p className="text-lg md:text-xl text-gray-800 font-semibold mb-2">
-              讓 AI 幫你規劃菜單，省時、省錢、又營養！再也不用煩惱今天吃什麼，冰箱剩菜也能變美味大餐。
-            </p>
-            <p className="text-lg md:text-xl text-gray-700 mb-4">
-              Recipe AI uses cutting-edge AI to plan your meals, save money, and boost nutrition. No more thinking about what to eat—just enjoy healthy, delicious recipes tailored to you!
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 my-6">
-              {/* Replace src with your DALL·E generated images */}
-              <img src="/images/ai-chef.png" alt="AI Chef" className="rounded-xl shadow-lg w-64 h-64 object-cover" />
-              <img src="/images/happy-family.png" alt="Happy Family" className="rounded-xl shadow-lg w-64 h-64 object-cover" />
-              <img src="/images/smart-fridge.png" alt="Smart Fridge" className="rounded-xl shadow-lg w-64 h-64 object-cover" />
-            </div>
-            <ul className="text-lg text-green-700 font-bold mt-4 space-y-2">
-              <li>🌟 AI自動生成專屬菜單，輕鬆健康每一天</li>
-              <li>💰 精打細算，善用冰箱食材不浪費</li>
-              <li>🥗 營養均衡，適合全家大小</li>
-              <li>🤖 一鍵搞定，無腦料理新體驗</li>
-            </ul>
-            <ul className="text-lg text-blue-700 font-bold mt-4 space-y-2">
-              <li>🌟 AI-powered personalized menus for effortless healthy living</li>
-              <li>💰 Save money by using what you already have</li>
-              <li>🥗 Nutritious, balanced meals for everyone</li>
-              <li>🤖 One-click magic—let AI do the thinking!</li>
-            </ul>
-          </section>
           <div className="card md:col-span-2">
             <h2 className="text-2xl font-bold mb-6 text-indigo-700">Upload Your Kitchen Insights</h2>
             <div className="space-y-6">
