@@ -52,10 +52,11 @@ export default function SignIn() {
     setLoading(true);
     setError(null);
     try {
+      console.log("Redirecting to:", `${window.location.origin}/recipe-generator`);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/recipe-generator`,
+          redirectTo: `/recipe-generator`,
         },
       });
 
