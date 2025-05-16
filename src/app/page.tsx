@@ -132,9 +132,14 @@ export default function Home() {
     formData.append('type', uploadType);
 
     try {
+      // Get the current user's access token
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+
       const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
       });
       const result = await response.json();
       console.log(result);
