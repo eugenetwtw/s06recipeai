@@ -10,8 +10,8 @@ const supabase = (() => {
   if (!url || !key) {
     console.error("Supabase environment variables are missing or empty:");
     if (!url) console.error("NEXT_PUBLIC_SUPABASE_URL is not set.");
-    if (!key) console.error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not set.");
-    console.error("Please ensure these variables are correctly set in Vercel under Environment Variables.");
+    if (!key) console.error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not set. Note: SUPABASE_SERVICE_ROLE_KEY is for server-side use only and should not be used on the client side.");
+    console.error("Please ensure these variables are correctly set in Vercel under Environment Variables with the NEXT_PUBLIC_ prefix for client-side access.");
     return null;
   }
   return createClient(url, key);
@@ -38,7 +38,7 @@ export default function SignIn() {
             <div className="flex">
               <div className="ml-3">
                 <p className="text-sm font-medium text-red-800">
-                  Error: Supabase configuration is missing. Please contact the administrator to set up the necessary environment variables.
+                  Error: Supabase configuration is missing. Please ensure that NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are correctly set in Vercel's Environment Variables for the appropriate environment (e.g., Production). Check the browser console for detailed logs.
                 </p>
               </div>
             </div>
