@@ -12,105 +12,128 @@ const openai = new OpenAI({
 });
 
 export async function POST(request: NextRequest) {
-  // Extract access token from Authorization header
-  const authHeader = request.headers.get('authorization');
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  try {
+    // Extract access token from Authorization header
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
-  if (!token) {
-    return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
-  }
-
-  // Get the user from the token
-  const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
-  if (userError || !user?.id) {
-    return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
-  }
-
-  const userId = user.id;
-  const formData = await request.formData();
-  // Support multiple files
-  const files = formData.getAll('files') as File[];
-  const uploadType = formData.get('type') as string;
-
-  if (!files.length) {
-    return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
-  }
-
-  // Upload to Supabase storage
-  const results = [];
-
-  for (const file of files) {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${uploadType}_${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET_NAME!)
-      .upload(fileName, file);
-
-    if (uploadError) {
-      results.push({ error: uploadError.message, file: file.name });
-      continue;
+    if (!token) {
+      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
     }
 
-    // Analyze image with OpenAI
-    const imageUrl = supabase.storage
-      .from(process.env.SUPABASE_STORAGE_BUCKET_NAME!)
-      .getPublicUrl(fileName).data.publicUrl;
+    // Get the user from the token
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: `Describe the contents of this ${uploadType} image in detail.` },
-            { type: "image_url", image_url: { url: imageUrl } }
-          ]
+    if (userError || !user?.id) {
+      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
+    }
+
+    const userId = user.id;
+    const formData = await request.formData();
+    // Support multiple files
+    const files = formData.getAll('files') as File[];
+    const uploadType = formData.get('type') as string;
+
+    if (!files.length) {
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    }
+
+    // Upload to Supabase storage
+    const results = [];
+
+    for (const file of files) {
+      try {
+        if (!(file instanceof File)) {
+          results.push({ error: 'Invalid file object', file: typeof file });
+          continue;
         }
-      ]
-    });
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userId}/${uploadType}_${Date.now()}_${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-    const analysis = response.choices[0].message.content || '{}';
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from(process.env.SUPABASE_STORAGE_BUCKET_NAME!)
+          .upload(fileName, file);
 
-    // Save to appropriate table
-    let insertResult;
-    switch(uploadType) {
-      case 'refrigerator':
-        insertResult = await supabase
-          .from('refrigerator_contents')
-          .insert({ 
-            user_id: userId, 
-            image_url: imageUrl, 
-            detected_ingredients: JSON.parse(analysis) 
+        if (uploadError) {
+          results.push({ error: uploadError.message, file: file.name });
+          continue;
+        }
+
+        // Analyze image with OpenAI
+        const imageUrl = supabase.storage
+          .from(process.env.SUPABASE_STORAGE_BUCKET_NAME!)
+          .getPublicUrl(fileName).data.publicUrl;
+
+        let analysis = '{}';
+        try {
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: `Describe the contents of this ${uploadType} image in detail.` },
+                  { type: "image_url", image_url: { url: imageUrl } }
+                ]
+              }
+            ]
           });
-        break;
-      case 'kitchen_tools':
-        insertResult = await supabase
-          .from('kitchen_tools')
-          .insert({ 
-            user_id: userId, 
-            image_url: imageUrl, 
-            detected_tools: JSON.parse(analysis) 
-          });
-        break;
-      case 'meal_history':
-        insertResult = await supabase
-          .from('meal_history')
-          .insert({ 
-            user_id: userId, 
-            image_url: imageUrl 
-          });
-        break;
+          analysis = response.choices[0].message.content || '{}';
+        } catch (aiError) {
+          results.push({ error: 'OpenAI analysis failed', details: aiError instanceof Error ? aiError.message : aiError, file: file.name });
+          continue;
+        }
+
+        // Save to appropriate table
+        let insertResult;
+        try {
+          switch(uploadType) {
+            case 'refrigerator':
+              insertResult = await supabase
+                .from('refrigerator_contents')
+                .insert({ 
+                  user_id: userId, 
+                  image_url: imageUrl, 
+                  detected_ingredients: JSON.parse(analysis) 
+                });
+              break;
+            case 'kitchen_tools':
+              insertResult = await supabase
+                .from('kitchen_tools')
+                .insert({ 
+                  user_id: userId, 
+                  image_url: imageUrl, 
+                  detected_tools: JSON.parse(analysis) 
+                });
+              break;
+            case 'meal_history':
+              insertResult = await supabase
+                .from('meal_history')
+                .insert({ 
+                  user_id: userId, 
+                  image_url: imageUrl 
+                });
+              break;
+          }
+        } catch (dbError) {
+          results.push({ error: 'Database insert failed', details: dbError instanceof Error ? dbError.message : dbError, file: file.name });
+          continue;
+        }
+
+        results.push({ 
+          message: 'Upload successful', 
+          imageUrl, 
+          analysis,
+          file: file.name
+        });
+      } catch (fileError) {
+        results.push({ error: 'Unexpected error during file processing', details: fileError instanceof Error ? fileError.message : fileError });
+      }
     }
 
-    results.push({ 
-      message: 'Upload successful', 
-      imageUrl, 
-      analysis,
-      file: file.name
-    });
+    return NextResponse.json({ results });
+  } catch (error) {
+    console.error('API /api/upload error:', error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
-
-  return NextResponse.json({ results });
 }
