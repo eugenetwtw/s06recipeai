@@ -9,6 +9,23 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [mealHistoryText, setMealHistoryText] = useState<string>('');
   const [processingText, setProcessingText] = useState<boolean>(false);
+  const [processingSeconds, setProcessingSeconds] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (processingText) {
+      setProcessingSeconds(0);
+      timer = setInterval(() => {
+        setProcessingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setProcessingSeconds(0);
+      if (timer) clearInterval(timer);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [processingText]);
 
   const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
@@ -246,7 +263,7 @@ export default function Home() {
                         disabled={processingText || !mealHistoryText.trim()}
                         className="btn-secondary w-full mt-2"
                       >
-                        {processingText ? 'Processing...' : 'Process Text'}
+                        {processingText ? `Processing... (${processingSeconds}s)` : 'Process Text'}
                       </button>
                     </div>
                   </>
