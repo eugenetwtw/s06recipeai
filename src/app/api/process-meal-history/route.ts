@@ -45,15 +45,16 @@ export async function POST(request: NextRequest) {
     // Generate a placeholder image URL (in a real app, this might be a default image)
     const placeholderImageUrl = `https://via.placeholder.com/300x200?text=${encodeURIComponent(mealData.restaurant_name || 'Meal History')}`;
 
-    // Save to Supabase
+    // Save to Supabase - store the meal data in the image_url field as a workaround
+    // since the meal_history table doesn't have an order_details column
+    const mealDataString = JSON.stringify(mealData);
+    
     const { data, error } = await supabase
       .from('meal_history')
       .insert({
         user_id: userId,
         image_url: placeholderImageUrl,
-        order_details: mealData,
-        source: 'text_input',
-        processed_at: new Date().toISOString()
+        detected_ingredients: mealData // Using detected_ingredients as a temporary field for meal data
       });
 
     if (error) {

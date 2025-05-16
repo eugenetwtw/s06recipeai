@@ -338,25 +338,25 @@ export default function Home() {
                         </p>
                       )}
                       
-                      {item.order_details && (
+                      {item.detected_ingredients && (
                         <div className="text-sm">
-                          {item.order_details.restaurant_name && (
-                            <p className="font-bold text-indigo-600">{item.order_details.restaurant_name}</p>
+                          {item.detected_ingredients.restaurant_name && (
+                            <p className="font-bold text-indigo-600">{item.detected_ingredients.restaurant_name}</p>
                           )}
                           
-                          {item.order_details.order_date && (
-                            <p className="text-gray-500 mb-1">Date: {item.order_details.order_date}</p>
+                          {item.detected_ingredients.order_date && (
+                            <p className="text-gray-500 mb-1">Date: {item.detected_ingredients.order_date}</p>
                           )}
                           
-                          {item.order_details.cuisine_type && (
-                            <p className="text-gray-500 mb-1">Cuisine: {item.order_details.cuisine_type}</p>
+                          {item.detected_ingredients.cuisine_type && (
+                            <p className="text-gray-500 mb-1">Cuisine: {item.detected_ingredients.cuisine_type}</p>
                           )}
                           
-                          {item.order_details.dishes && item.order_details.dishes.length > 0 && (
+                          {item.detected_ingredients.dishes && item.detected_ingredients.dishes.length > 0 && (
                             <div className="mt-2">
                               <p className="font-medium">Dishes:</p>
                               <ul className="list-disc pl-5">
-                                {item.order_details.dishes.map((dish: any, dishIndex: number) => (
+                                {item.detected_ingredients.dishes.map((dish: any, dishIndex: number) => (
                                   <li key={dishIndex}>
                                     {dish.name}
                                     {dish.quantity && <span> (x{dish.quantity})</span>}
