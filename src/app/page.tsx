@@ -1,10 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadType, setUploadType] = useState<string>('refrigerator');
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Fetch current session
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+    getSession();
+
+    // Listen for auth changes (e.g., sign in/out in another tab)
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    window.location.reload();
+  };
 
   const handleFileUpload = async () => {
     if (!selectedFile) return;
@@ -42,7 +72,26 @@ export default function Home() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Recipe AI</h1>
-          <a href="/sign-in" className="bg-indigo-500 text-white p-2 rounded">Sign In</a>
+          {user ? (
+            <div className="flex items-center space-x-4">
+              {user.user_metadata?.avatar_url && (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="avatar"
+                  className="w-8 h-8 rounded-full"
+                />
+              )}
+              <span className="text-gray-700">{user.email}</span>
+              <button
+                onClick={handleSignOut}
+                className="bg-gray-300 text-gray-800 p-2 rounded"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <a href="/sign-in" className="bg-indigo-500 text-white p-2 rounded">Sign In</a>
+          )}
         </div>
         
         <div>
