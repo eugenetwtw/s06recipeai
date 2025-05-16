@@ -71,9 +71,14 @@ export default function RecipeGeneratorPage() {
     }
   };
 
-  return (
+    return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Recipe Generator</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Recipe Generator</h1>
+        <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
+          Back to Homepage
+        </a>
+      </div>
       
       <div className="grid md:grid-cols-2 gap-8">
         {/* Ingredients Input Section */}

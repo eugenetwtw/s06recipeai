@@ -49,35 +49,55 @@ export default function Home() {
   const fetchUserData = async (userId: string) => {
     try {
       // Fetch refrigerator contents
-      const { data: fridgeData } = await supabase
+      const { data: fridgeData, error: fridgeError } = await supabase
         .from('refrigerator_contents')
         .select('*')
         .eq('user_id', userId);
-      setRefrigeratorData(fridgeData || []);
+      if (fridgeError) {
+        console.error('Error fetching refrigerator data:', fridgeError);
+        setRefrigeratorData([]);
+      } else {
+        setRefrigeratorData(fridgeData || []);
+      }
 
       // Fetch kitchen tools
-      const { data: toolsData } = await supabase
+      const { data: toolsData, error: toolsError } = await supabase
         .from('kitchen_tools')
         .select('*')
         .eq('user_id', userId);
-      setKitchenToolsData(toolsData || []);
+      if (toolsError) {
+        console.error('Error fetching kitchen tools data:', toolsError);
+        setKitchenToolsData([]);
+      } else {
+        setKitchenToolsData(toolsData || []);
+      }
 
       // Fetch meal history
-      const { data: mealData } = await supabase
+      const { data: mealData, error: mealError } = await supabase
         .from('meal_history')
         .select('*')
         .eq('user_id', userId);
-      setMealHistoryData(mealData || []);
+      if (mealError) {
+        console.error('Error fetching meal history data:', mealError);
+        setMealHistoryData([]);
+      } else {
+        setMealHistoryData(mealData || []);
+      }
 
       // Fetch user culinary profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('user_culinary_profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
-      setProfileData(profile || null);
+      if (profileError) {
+        console.error('Error fetching culinary profile data:', profileError);
+        setProfileData(null);
+      } else {
+        setProfileData(profile || null);
+      }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Unexpected error fetching user data:', error);
     }
   };
 
