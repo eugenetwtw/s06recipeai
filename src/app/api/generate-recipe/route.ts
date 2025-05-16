@@ -31,13 +31,32 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Log all cookies for debugging
+    // Log detailed request information for debugging
+    const headersObj: Record<string, string> = {};
+    request.headers.forEach((value, key) => {
+      headersObj[key] = value;
+    });
+    console.log('Request headers:', headersObj);
     console.log('Cookies received:', request.cookies.getAll());
     
-    // Get the session token from cookies
-    const sessionToken = request.cookies.get('supabase-auth-token')?.value;
+    // Try different possible cookie names for Supabase auth token
+    const possibleCookieNames = [
+      'supabase-auth-token',
+      'sb-access-token',
+      'sb-refresh-token'
+    ];
+    let sessionToken = null;
+    for (const name of possibleCookieNames) {
+      const token = request.cookies.get(name)?.value;
+      if (token) {
+        console.log(`Found token in cookie: ${name}`);
+        sessionToken = token;
+        break;
+      }
+    }
+    
     if (!sessionToken) {
-      console.log('No session token found in cookies');
+      console.log('No session token found in any known cookies');
       return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
     }
 
