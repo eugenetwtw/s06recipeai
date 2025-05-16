@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const mealData = JSON.parse(response.choices[0].message.content || '{}');
 
     // Generate a placeholder image URL (in a real app, this might be a default image)
-    const placeholderImageUrl = `https://via.placeholder.com/300x200?text=${encodeURIComponent(mealData.restaurant_name || 'Meal History')}`;
+    const placeholderImageUrl = `https://placehold.co/300x200?text=${encodeURIComponent(mealData.restaurant_name || 'Meal History')}`;
 
     // Save to Supabase - store the meal data in the image_url field as a workaround
     // since the meal_history table doesn't have an order_details column
