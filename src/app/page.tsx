@@ -185,10 +185,17 @@ export default function Home() {
             <p className="text-gray-600 mb-6">Let AI craft a personalized recipe based on your kitchen inventory!</p>
             <button 
               onClick={handleGenerateRecipe}
-              className="btn-secondary"
+              className="btn-secondary mb-3"
             >
               Generate Recipe
             </button>
+            <p className="text-gray-600 mb-3">Or, customize your recipe with specific ingredients:</p>
+            <a 
+              href="/recipe-generator"
+              className="btn-primary text-sm"
+            >
+              Custom Recipe Generator
+            </a>
           </div>
         </div>
 
