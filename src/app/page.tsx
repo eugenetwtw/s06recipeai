@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadType, setUploadType] = useState<string>('refrigerator');
   const [user, setUser] = useState<any>(null);
   const [mealHistoryText, setMealHistoryText] = useState<string>('');
@@ -123,10 +123,12 @@ export default function Home() {
   };
 
   const handleFileUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFiles.length) return;
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    selectedFiles.forEach((file) => {
+      formData.append('files', file);
+    });
     formData.append('type', uploadType);
 
     try {
@@ -237,16 +239,17 @@ export default function Home() {
                 {uploadType === 'meal_history' ? (
                   <>
                     <div className="flex flex-col md:flex-row gap-4">
-                      <input 
-                        type="file" 
-                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
                         className="input-primary flex-1"
                       />
-                      <button 
+                      <button
                         onClick={handleFileUpload}
                         className="btn-primary"
                       >
-                        Upload Image
+                        Choose photos to upload
                       </button>
                     </div>
                     
@@ -269,16 +272,17 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="flex flex-col md:flex-row gap-4">
-                    <input 
-                      type="file" 
-                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
                       className="input-primary flex-1"
                     />
-                    <button 
+                    <button
                       onClick={handleFileUpload}
                       className="btn-primary"
                     >
-                      Upload Image
+                      Choose photos to upload
                     </button>
                   </div>
                 )}
