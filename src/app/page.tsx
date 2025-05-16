@@ -165,7 +165,10 @@ export default function Home() {
               </button>
             </div>
           ) : (
-            <a href="/sign-in" className="btn-primary text-sm">Sign In</a>
+            <div className="flex space-x-3">
+              <a href="/sign-in" className="btn-primary text-sm">Sign In</a>
+              <a href="/sign-up" className="btn-secondary text-sm">Sign Up</a>
+            </div>
           )}
         </header>
         
