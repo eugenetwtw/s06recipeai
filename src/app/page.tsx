@@ -7,6 +7,8 @@ export default function Home() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadType, setUploadType] = useState<string>('refrigerator');
   const [user, setUser] = useState<any>(null);
+  const [mealHistoryText, setMealHistoryText] = useState<string>('');
+  const [processingText, setProcessingText] = useState<boolean>(false);
 
   const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
@@ -126,6 +128,38 @@ export default function Home() {
     }
   };
 
+  const handleProcessMealHistory = async () => {
+    if (!mealHistoryText.trim() || !user) return;
+    
+    setProcessingText(true);
+    
+    try {
+      const response = await fetch('/api/process-meal-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: mealHistoryText,
+          userId: user.id
+        })
+      });
+      
+      const result = await response.json();
+      console.log(result);
+      
+      // Refresh data after successful processing
+      if (user) {
+        fetchUserData(user.id);
+        setMealHistoryText(''); // Clear the text area
+      }
+    } catch (error) {
+      console.error('Meal history processing failed', error);
+    } finally {
+      setProcessingText(false);
+    }
+  };
+
   const handleGenerateRecipe = async () => {
     try {
       const response = await fetch('/api/generate-recipe', {
@@ -172,30 +206,66 @@ export default function Home() {
           <div className="card md:col-span-2">
             <h2 className="text-2xl font-bold mb-6 text-indigo-700">Upload Your Kitchen Insights</h2>
             <div className="space-y-6">
-              <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex flex-col gap-4">
                 <select 
                   value={uploadType} 
                   onChange={(e) => setUploadType(e.target.value)}
-                  className="input-primary flex-1"
+                  className="input-primary"
                 >
                   <option value="refrigerator">Refrigerator Contents</option>
                   <option value="kitchen_tools">Kitchen Tools</option>
                   <option value="meal_history">Meal History</option>
                 </select>
                 
-                <input 
-                  type="file" 
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="input-primary flex-1"
-                />
+                {uploadType === 'meal_history' ? (
+                  <>
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <input 
+                        type="file" 
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        className="input-primary flex-1"
+                      />
+                      <button 
+                        onClick={handleFileUpload}
+                        className="btn-primary"
+                      >
+                        Upload Image
+                      </button>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <p className="text-gray-700 mb-2">Or paste text from historical meal orders (UberEats, Foodpanda, DoorDash, etc.):</p>
+                      <textarea 
+                        value={mealHistoryText}
+                        onChange={(e) => setMealHistoryText(e.target.value)}
+                        className="input-primary w-full h-32"
+                        placeholder="Paste your order history text here..."
+                      />
+                      <button 
+                        onClick={handleProcessMealHistory}
+                        disabled={processingText || !mealHistoryText.trim()}
+                        className="btn-secondary w-full mt-2"
+                      >
+                        {processingText ? 'Processing...' : 'Process Text'}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <input 
+                      type="file" 
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      className="input-primary flex-1"
+                    />
+                    <button 
+                      onClick={handleFileUpload}
+                      className="btn-primary"
+                    >
+                      Upload Image
+                    </button>
+                  </div>
+                )}
               </div>
-              
-              <button 
-                onClick={handleFileUpload}
-                className="btn-primary w-full md:w-auto"
-              >
-                Upload Image
-              </button>
             </div>
           </div>
 
@@ -255,10 +325,49 @@ export default function Home() {
             <div className="card">
               <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Meal History</h2>
               {mealHistoryData.length > 0 ? (
-                <ul className="space-y-2">
+                <ul className="space-y-4">
                   {mealHistoryData.map((item, index) => (
-                    <li key={index} className="border-b pb-2">
-                      <p className="font-medium">Image: <a href={item.image_url} target="_blank" className="text-indigo-500 underline">{item.image_url}</a></p>
+                    <li key={index} className="border-b pb-4">
+                      {item.image_url && (
+                        <p className="font-medium mb-2">
+                          <img 
+                            src={item.image_url} 
+                            alt="Meal" 
+                            className="w-full h-32 object-cover rounded-lg mb-2" 
+                          />
+                        </p>
+                      )}
+                      
+                      {item.order_details && (
+                        <div className="text-sm">
+                          {item.order_details.restaurant_name && (
+                            <p className="font-bold text-indigo-600">{item.order_details.restaurant_name}</p>
+                          )}
+                          
+                          {item.order_details.order_date && (
+                            <p className="text-gray-500 mb-1">Date: {item.order_details.order_date}</p>
+                          )}
+                          
+                          {item.order_details.cuisine_type && (
+                            <p className="text-gray-500 mb-1">Cuisine: {item.order_details.cuisine_type}</p>
+                          )}
+                          
+                          {item.order_details.dishes && item.order_details.dishes.length > 0 && (
+                            <div className="mt-2">
+                              <p className="font-medium">Dishes:</p>
+                              <ul className="list-disc pl-5">
+                                {item.order_details.dishes.map((dish: any, dishIndex: number) => (
+                                  <li key={dishIndex}>
+                                    {dish.name}
+                                    {dish.quantity && <span> (x{dish.quantity})</span>}
+                                    {dish.price && <span> - {dish.price}</span>}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
