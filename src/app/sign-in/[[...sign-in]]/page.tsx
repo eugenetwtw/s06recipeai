@@ -4,15 +4,49 @@ import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = (() => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    console.error("Supabase environment variables are missing or empty:");
+    if (!url) console.error("NEXT_PUBLIC_SUPABASE_URL is not set.");
+    if (!key) console.error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not set.");
+    console.error("Please ensure these variables are correctly set in Vercel under Environment Variables.");
+    return null;
+  }
+  return createClient(url, key);
+})();
 
 export default function SignIn() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (!supabase) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center py-2">
+        <div className="w-full max-w-md space-y-8">
+          <div>
+            <h1 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+              Sign in to RecipeAI
+            </h1>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Use your Google account to continue
+            </p>
+          </div>
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="ml-3">
+                <p className="text-sm font-medium text-red-800">
+                  Error: Supabase configuration is missing. Please contact the administrator to set up the necessary environment variables.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
