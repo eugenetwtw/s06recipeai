@@ -31,15 +31,20 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Log all cookies for debugging
+    console.log('Cookies received:', request.cookies.getAll());
+    
     // Get the session token from cookies
     const sessionToken = request.cookies.get('supabase-auth-token')?.value;
     if (!sessionToken) {
+      console.log('No session token found in cookies');
       return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
     }
 
     // Use the session token to get user data
-    const { data: { user } } = await supabase.auth.getUser(sessionToken);
-    if (!user) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser(sessionToken);
+    if (userError || !user) {
+      console.log('Error fetching user or no user found:', userError?.message || 'No user');
       return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
     }
     const userId = user.id;
