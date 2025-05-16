@@ -70,8 +70,8 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col justify-center items-center p-6 md:p-12">
       <div className="container-custom">
-        <header className="flex justify-between items-center mb-12 animate-pulse-once">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Recipe AI</h1>
+        <header className="flex justify-between items-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-600">Recipe AI</h1>
           {user ? (
             <div className="flex items-center space-x-4">
               {user.user_metadata?.avatar_url && (

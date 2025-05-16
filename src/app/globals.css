@@ -3,29 +3,25 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gradient-to-br from-indigo-50 to-blue-50 text-gray-800 font-sans;
+  @apply bg-indigo-50 text-gray-800 font-sans;
 }
 
 .btn-primary {
-  @apply bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:from-indigo-600 hover:to-blue-700 transition-all duration-300;
+  @apply bg-indigo-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200;
 }
 
 .btn-secondary {
-  @apply bg-gradient-to-r from-green-400 to-teal-500 text-white px-6 py-3 rounded-lg shadow-md hover:from-green-500 hover:to-teal-600 transition-all duration-300;
+  @apply bg-teal-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-teal-600 transition-colors duration-200;
 }
 
 .input-primary {
-  @apply border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200;
+  @apply border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-colors duration-200;
 }
 
 .card {
-  @apply bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
+  @apply bg-white rounded-xl shadow-lg p-6;
 }
 
 .container-custom {
   @apply max-w-5xl mx-auto px-4;
-}
-
-.animate-pulse-once {
-  @apply animate-pulse duration-1000;
 }
