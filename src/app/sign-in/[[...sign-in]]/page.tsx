@@ -52,7 +52,7 @@ export default function SignIn() {
     setLoading(true);
     setError(null);
     try {
-      const redirectUrl = 'https://s06recipeai.vercel.app/recipe-generator';
+      const redirectUrl = 'https://s06recipeai.vercel.app';
       console.log("Redirecting to:", redirectUrl);
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -84,6 +84,12 @@ export default function SignIn() {
       }
     };
     checkUser();
+
+    // Check for tokens in URL fragment and redirect to clean URL if present
+    if (window.location.hash.includes('access_token')) {
+      window.history.replaceState({}, document.title, '/');
+      router.push('/');
+    }
   }, [router]);
 
   return (
