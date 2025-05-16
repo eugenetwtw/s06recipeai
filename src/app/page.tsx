@@ -68,63 +68,74 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-24">
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Recipe AI</h1>
+    <main className="min-h-screen flex flex-col justify-center items-center p-6 md:p-12">
+      <div className="container-custom">
+        <header className="flex justify-between items-center mb-12 animate-pulse-once">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">Recipe AI</h1>
           {user ? (
             <div className="flex items-center space-x-4">
               {user.user_metadata?.avatar_url && (
                 <img
                   src={user.user_metadata.avatar_url}
                   alt="avatar"
-                  className="w-8 h-8 rounded-full"
+                  className="w-10 h-10 rounded-full border-2 border-indigo-300"
                 />
               )}
-              <span className="text-gray-700">{user.email}</span>
+              <span className="text-gray-700 font-medium hidden md:inline">{user.email}</span>
               <button
                 onClick={handleSignOut}
-                className="bg-gray-300 text-gray-800 p-2 rounded"
+                className="btn-primary text-sm py-2 px-4"
               >
                 Sign Out
               </button>
             </div>
           ) : (
-            <a href="/sign-in" className="bg-indigo-500 text-white p-2 rounded">Sign In</a>
+            <a href="/sign-in" className="btn-primary text-sm">Sign In</a>
           )}
-        </div>
+        </header>
         
-        <div>
-          <select 
-            value={uploadType} 
-            onChange={(e) => setUploadType(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="refrigerator">Refrigerator Contents</option>
-            <option value="kitchen_tools">Kitchen Tools</option>
-            <option value="meal_history">Meal History</option>
-          </select>
-          
-          <input 
-            type="file" 
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-            className="ml-4"
-          />
-          
-          <button 
-            onClick={handleFileUpload}
-            className="bg-blue-500 text-white p-2 rounded ml-4"
-          >
-            Upload Image
-          </button>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="card md:col-span-2">
+            <h2 className="text-2xl font-bold mb-6 text-indigo-700">Upload Your Kitchen Insights</h2>
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row gap-4">
+                <select 
+                  value={uploadType} 
+                  onChange={(e) => setUploadType(e.target.value)}
+                  className="input-primary flex-1"
+                >
+                  <option value="refrigerator">Refrigerator Contents</option>
+                  <option value="kitchen_tools">Kitchen Tools</option>
+                  <option value="meal_history">Meal History</option>
+                </select>
+                
+                <input 
+                  type="file" 
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  className="input-primary flex-1"
+                />
+              </div>
+              
+              <button 
+                onClick={handleFileUpload}
+                className="btn-primary w-full md:w-auto"
+              >
+                Upload Image
+              </button>
+            </div>
+          </div>
 
-        <button 
-          onClick={handleGenerateRecipe}
-          className="bg-green-500 text-white p-2 rounded"
-        >
-          Generate Personalized Recipe
-        </button>
+          <div className="card flex flex-col justify-center items-center text-center">
+            <h2 className="text-2xl font-bold mb-4 text-teal-600">Magic Recipe Generator</h2>
+            <p className="text-gray-600 mb-6">Let AI craft a personalized recipe based on your kitchen inventory!</p>
+            <button 
+              onClick={handleGenerateRecipe}
+              className="btn-secondary"
+            >
+              Generate Recipe
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   );

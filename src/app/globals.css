@@ -3,13 +3,29 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gray-50 text-gray-900;
+  @apply bg-gradient-to-br from-indigo-50 to-blue-50 text-gray-800 font-sans;
 }
 
 .btn-primary {
-  @apply bg-recipe-primary text-white px-4 py-2 rounded hover:bg-green-600 transition-colors;
+  @apply bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:from-indigo-600 hover:to-blue-700 transition-all duration-300;
+}
+
+.btn-secondary {
+  @apply bg-gradient-to-r from-green-400 to-teal-500 text-white px-6 py-3 rounded-lg shadow-md hover:from-green-500 hover:to-teal-600 transition-all duration-300;
 }
 
 .input-primary {
-  @apply border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-recipe-primary;
+  @apply border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300;
+}
+
+.container-custom {
+  @apply max-w-5xl mx-auto px-4;
+}
+
+.animate-pulse-once {
+  @apply animate-pulse duration-1000;
 }
