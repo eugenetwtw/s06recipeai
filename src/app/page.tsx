@@ -40,7 +40,10 @@ export default function Home() {
   return (
     <main className="min-h-screen p-24">
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Recipe AI</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Recipe AI</h1>
+          <a href="/sign-in" className="bg-indigo-500 text-white p-2 rounded">Sign In</a>
+        </div>
         
         <div>
           <select 
