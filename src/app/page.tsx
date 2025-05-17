@@ -15,8 +15,20 @@ export default function Home() {
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
   const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
   const [recipeHistoryData, setRecipeHistoryData] = useState<any[]>([]);
-  const [userPreferences, setUserPreferences] = useState<string[]>([]);
-  const [newPreference, setNewPreference] = useState<string>('');
+  // userPreferences: 全面支援物件型態
+  const [userPreferences, setUserPreferences] = useState<any>({
+    vegetarian: false,
+    vegan: false,
+    gluten_free: false,
+    dairy_free: false,
+    exclude_ingredients: [],
+    favorite_cuisines: [],
+    spiciness_preference: 5,
+    notes: ''
+  });
+  const [newExcludeIngredient, setNewExcludeIngredient] = useState('');
+  const [newFavoriteCuisine, setNewFavoriteCuisine] = useState('');
+  const [preferencesChanged, setPreferencesChanged] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -129,17 +141,18 @@ export default function Home() {
          headers: { Authorization: `Bearer ${accessToken}` }
       });
       const data = await res.json();
-      // If the returned data is an object with boolean flags, convert to a string array of enabled preferences
-      if (data && typeof data === 'object' && !Array.isArray(data)) {
-        const prefs: string[] = [];
-        if (data.vegetarian) prefs.push("Vegetarian");
-        if (data.vegan) prefs.push("Vegan");
-        if (data.glutenFree) prefs.push("Gluten-Free");
-        if (data.dairyFree) prefs.push("Dairy-Free");
-        setUserPreferences(prefs);
-      } else {
-        setUserPreferences(data);
-      }
+      // 直接設為物件
+      setUserPreferences({
+        vegetarian: !!data.vegetarian,
+        vegan: !!data.vegan,
+        gluten_free: !!data.gluten_free,
+        dairy_free: !!data.dairy_free,
+        exclude_ingredients: Array.isArray(data.exclude_ingredients) ? data.exclude_ingredients : [],
+        favorite_cuisines: Array.isArray(data.favorite_cuisines) ? data.favorite_cuisines : [],
+        spiciness_preference: typeof data.spiciness_preference === 'number' ? data.spiciness_preference : 5,
+        notes: data.notes || ''
+      });
+      setPreferencesChanged(false);
     } catch (error) {
       console.error('Error fetching user preferences:', error);
     }
@@ -165,6 +178,8 @@ export default function Home() {
          body: JSON.stringify(userPreferences)
       });
       const result = await res.json();
+      setPreferencesChanged(false);
+      fetchUserPreferences(user?.id);
       console.log('Saved preferences:', result);
     } catch (error) {
       console.error('Error saving preferences:', error);
@@ -245,22 +260,42 @@ export default function Home() {
     }
   };
   
-  const handleAddPreference = () => {
-    if (newPreference.trim() !== "") {
-      setUserPreferences([...userPreferences, newPreference.trim()]);
-      setNewPreference("");
+  // Exclude Ingredients
+  const handleAddExcludeIngredient = () => {
+    if (newExcludeIngredient.trim() !== "") {
+      setUserPreferences((prev: any) => ({
+        ...prev,
+        exclude_ingredients: [...prev.exclude_ingredients, newExcludeIngredient.trim()]
+      }));
+      setNewExcludeIngredient("");
+      setPreferencesChanged(true);
     }
   };
-
-  const handleDeletePreference = (index: number) => {
-    setUserPreferences(userPreferences.filter((_, i) => i !== index));
+  const handleDeleteExcludeIngredient = (index: number) => {
+    setUserPreferences((prev: any) => ({
+      ...prev,
+      exclude_ingredients: prev.exclude_ingredients.filter((_: any, i: number) => i !== index)
+    }));
+    setPreferencesChanged(true);
   };
 
-  const handlePreferenceKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddPreference();
+  // Favorite Cuisines
+  const handleAddFavoriteCuisine = () => {
+    if (newFavoriteCuisine.trim() !== "") {
+      setUserPreferences((prev: any) => ({
+        ...prev,
+        favorite_cuisines: [...prev.favorite_cuisines, newFavoriteCuisine.trim()]
+      }));
+      setNewFavoriteCuisine("");
+      setPreferencesChanged(true);
     }
+  };
+  const handleDeleteFavoriteCuisine = (index: number) => {
+    setUserPreferences((prev: any) => ({
+      ...prev,
+      favorite_cuisines: prev.favorite_cuisines.filter((_: any, i: number) => i !== index)
+    }));
+    setPreferencesChanged(true);
   };
   
   return (
@@ -383,6 +418,159 @@ export default function Home() {
 
         {user && (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="card">
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Dietary Preferences</h2>
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-4 mb-2">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={userPreferences.vegetarian}
+                      onChange={e => {
+                        setUserPreferences((prev: any) => ({ ...prev, vegetarian: e.target.checked }));
+                        setPreferencesChanged(true);
+                      }}
+                    /> Vegetarian
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={userPreferences.vegan}
+                      onChange={e => {
+                        setUserPreferences((prev: any) => ({ ...prev, vegan: e.target.checked }));
+                        setPreferencesChanged(true);
+                      }}
+                    /> Vegan
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={userPreferences.gluten_free}
+                      onChange={e => {
+                        setUserPreferences((prev: any) => ({ ...prev, gluten_free: e.target.checked }));
+                        setPreferencesChanged(true);
+                      }}
+                    /> Gluten-Free
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={userPreferences.dairy_free}
+                      onChange={e => {
+                        setUserPreferences((prev: any) => ({ ...prev, dairy_free: e.target.checked }));
+                        setPreferencesChanged(true);
+                      }}
+                    /> Dairy-Free
+                  </label>
+                </div>
+                <div className="mb-2">
+                  <label className="font-medium">Exclude Ingredients:</label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {userPreferences.exclude_ingredients.map((item: string, idx: number) => (
+                      <span key={idx} className="inline-flex items-center bg-red-100 text-red-700 px-2 py-1 rounded mr-2 mb-1">
+                        {item}
+                        <button
+                          className="ml-1 text-red-500 font-bold"
+                          onClick={() => handleDeleteExcludeIngredient(idx)}
+                          aria-label="Remove"
+                        >-</button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      value={newExcludeIngredient}
+                      onChange={e => setNewExcludeIngredient(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddExcludeIngredient();
+                        }
+                      }}
+                      className="input-primary w-32"
+                      placeholder="Add ingredient"
+                    />
+                    <button
+                      className="btn-primary px-2 py-1"
+                      onClick={handleAddExcludeIngredient}
+                      aria-label="Add"
+                    >+</button>
+                  </div>
+                </div>
+                <div className="mb-2">
+                  <label className="font-medium">Favorite Cuisines:</label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {userPreferences.favorite_cuisines.map((item: string, idx: number) => (
+                      <span key={idx} className="inline-flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2 mb-1">
+                        {item}
+                        <button
+                          className="ml-1 text-blue-500 font-bold"
+                          onClick={() => handleDeleteFavoriteCuisine(idx)}
+                          aria-label="Remove"
+                        >-</button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      value={newFavoriteCuisine}
+                      onChange={e => setNewFavoriteCuisine(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddFavoriteCuisine();
+                        }
+                      }}
+                      className="input-primary w-32"
+                      placeholder="Add cuisine"
+                    />
+                    <button
+                      className="btn-primary px-2 py-1"
+                      onClick={handleAddFavoriteCuisine}
+                      aria-label="Add"
+                    >+</button>
+                  </div>
+                </div>
+                <div className="mb-2">
+                  <label className="font-medium">Spiciness Preference: </label>
+                  <input
+                    type="range"
+                    min={0}
+                    max={10}
+                    value={userPreferences.spiciness_preference}
+                    onChange={e => {
+                      setUserPreferences((prev: any) => ({
+                        ...prev,
+                        spiciness_preference: Number(e.target.value)
+                      }));
+                      setPreferencesChanged(true);
+                    }}
+                    className="w-32 align-middle"
+                  />
+                  <span className="ml-2">{userPreferences.spiciness_preference}</span>
+                </div>
+                <div className="mb-2">
+                  <label className="font-medium">Notes:</label>
+                  <textarea
+                    value={userPreferences.notes}
+                    onChange={e => {
+                      setUserPreferences((prev: any) => ({
+                        ...prev,
+                        notes: e.target.value
+                      }));
+                      setPreferencesChanged(true);
+                    }}
+                    className="input-primary w-full h-16"
+                    placeholder="Other dietary notes..."
+                  />
+                </div>
+                <button
+                  className={`btn-primary w-full mt-2 ${!preferencesChanged ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={handleSavePreferences}
+                  disabled={!preferencesChanged}
+                >
+                  Save Preferences
+                </button>
+              </div>
+            </div>
             <div className="card">
               <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Refrigerator Contents</h2>
               {refrigeratorData.length > 0 ? (
