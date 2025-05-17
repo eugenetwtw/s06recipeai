@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 
 type DietaryPreferences = {
   vegetarian?: boolean;
@@ -11,10 +12,24 @@ type DietaryPreferences = {
 };
 
 export default function RecipeGeneratorPage() {
+  const router = useRouter();
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [newIngredient, setNewIngredient] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [generatedRecipe, setGeneratedRecipe] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsAuthenticated(!!session);
+    if (!session) {
+      router.push('/login');
+    }
+  };
 
   const addIngredient = () => {
     if (newIngredient.trim() && !ingredients.includes(newIngredient.trim())) {
@@ -27,7 +42,12 @@ export default function RecipeGeneratorPage() {
     setIngredients(prev => prev.filter(ing => ing !== ingredientToRemove));
   };
 
-    const generateRecipe = async () => {
+  const generateRecipe = async () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
+
     if (ingredients.length === 0) {
       alert('Please add at least one ingredient');
       return;
@@ -44,17 +64,21 @@ export default function RecipeGeneratorPage() {
     };
 
     try {
-      // Use Supabase client to make an authenticated request
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
       const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
-        credentials: 'include', // Ensure cookies are sent with the request
         body: JSON.stringify({
           ingredients,
-          refrigeratorContents: [], // TODO: Implement actual contents
-          cookingTools: [], // TODO: Implement actual tools
+          refrigeratorContents: [],
+          cookingTools: [],
           dietaryPreferences
         })
       });
@@ -68,7 +92,7 @@ export default function RecipeGeneratorPage() {
       }
     } catch (error) {
       console.error('Recipe Generation Error:', error);
-      alert('Failed to generate recipe. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to generate recipe. Please try again.');
     } finally {
       setIsLoading(false);
     }
