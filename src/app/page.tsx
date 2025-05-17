@@ -11,6 +11,13 @@ export default function Home() {
   const [processingText, setProcessingText] = useState<boolean>(false);
   const [processingSeconds, setProcessingSeconds] = useState<number>(0);
 
+  const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
+  const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
+  const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
+  const [recipeHistoryData, setRecipeHistoryData] = useState<any[]>([]);
+  const [userPreferences, setUserPreferences] = useState<string[]>([]);
+  const [newPreference, setNewPreference] = useState<string>('');
+
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
     if (processingText) {
@@ -27,18 +34,14 @@ export default function Home() {
     };
   }, [processingText]);
 
-  const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
-  const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
-  const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
-  const [recipeHistoryData, setRecipeHistoryData] = useState<any[]>([]);
-
   useEffect(() => {
-    // Fetch current session
+    // Fetch current session and user preferences
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
+        fetchUserPreferences(session.user.id);
       }
     };
     getSession();
@@ -48,6 +51,7 @@ export default function Home() {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
+        fetchUserPreferences(session.user.id);
       } else {
         setRefrigeratorData([]);
         setKitchenToolsData([]);
@@ -116,10 +120,55 @@ export default function Home() {
     }
   };
 
+  const fetchUserPreferences = async (userId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) return;
+      const res = await fetch('/api/user/preferences', {
+         headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      // If the returned data is an object with boolean flags, convert to a string array of enabled preferences
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const prefs: string[] = [];
+        if (data.vegetarian) prefs.push("Vegetarian");
+        if (data.vegan) prefs.push("Vegan");
+        if (data.glutenFree) prefs.push("Gluten-Free");
+        if (data.dairyFree) prefs.push("Dairy-Free");
+        setUserPreferences(prefs);
+      } else {
+        setUserPreferences(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user preferences:', error);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     window.location.reload();
+  };
+
+  const handleSavePreferences = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) return;
+      const res = await fetch('/api/user/preferences', {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+         },
+         body: JSON.stringify(userPreferences)
+      });
+      const result = await res.json();
+      console.log('Saved preferences:', result);
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+    }
   };
 
   const handleFileUpload = async () => {
@@ -195,7 +244,25 @@ export default function Home() {
       console.error('Recipe generation failed', error);
     }
   };
+  
+  const handleAddPreference = () => {
+    if (newPreference.trim() !== "") {
+      setUserPreferences([...userPreferences, newPreference.trim()]);
+      setNewPreference("");
+    }
+  };
 
+  const handleDeletePreference = (index: number) => {
+    setUserPreferences(userPreferences.filter((_, i) => i !== index));
+  };
+
+  const handlePreferenceKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddPreference();
+    }
+  };
+  
   return (
     <main className="min-h-screen flex flex-col justify-center items-center p-6 md:p-12">
       <div className="container-custom">
@@ -413,7 +480,7 @@ export default function Home() {
                   {recipeHistoryData.map((recipe, index) => (
                     <li key={index} className="border-b pb-2">
                       <p className="font-medium">{recipe.recipe_name}</p>
-                      <p className="text-sm text-gray-500">Generated on: {new Date(recipe.generated_at).toLocaleDateString()}</p>
+                      <p className="text-sm text-gray-500">Generated on: {new Date(recipe.generated_at).toLocaleString()}</p>
                     </li>
                   ))}
                 </ul>
@@ -421,6 +488,7 @@ export default function Home() {
                 <p className="text-gray-600">No generated recipes yet.</p>
               )}
             </div>
+
           </div>
         )}
       </div>

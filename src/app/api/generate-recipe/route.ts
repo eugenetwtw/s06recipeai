@@ -21,13 +21,11 @@ export async function POST(request: NextRequest) {
     );
 
     // Verify the token with Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    const { data: { user }, error: getUserError } = await supabase.auth.getUser(token);
+    if (getUserError || !user) {
       throw new Error('Authentication required. Please log in.');
     }
-
-    // Get user ID from session
-    const userId = session.user.id;
+    const userId = user.id;
 
     // Parse request body
     const { 
@@ -56,16 +54,16 @@ export async function POST(request: NextRequest) {
       recipe_name: recipeContent?.match(/^([^\n]+)/)?.[1] || 'Unnamed Recipe',
       ingredients: ingredients,
       instructions: recipeContent,
-      generated_at: new Date().toISOString()
+      generated_at: new Date().toLocaleString()
     };
 
     // Insert recipe into Supabase
-    const { data, error } = await supabase
+    const { data, error: insertError } = await supabase
       .from('generated_recipes')
       .insert(recipeData)
       .select();
 
-    if (error) throw error;
+    if (insertError) throw insertError;
 
     return NextResponse.json({ 
       recipe: recipeContent,
