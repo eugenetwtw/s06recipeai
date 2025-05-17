@@ -4,6 +4,31 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
+    // Get token from Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new Error('Authentication required. Please log in.');
+    }
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    // Initialize Supabase client with service role key
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!, 
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Verify the token with Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    // Get user ID from session
+    const userId = session.user.id;
+
     // Parse request body
     const { 
       ingredients, 
@@ -25,49 +50,6 @@ export async function POST(request: NextRequest) {
       context
     );
 
-    // Initialize Supabase client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Log detailed request information for debugging
-    const headersObj: Record<string, string> = {};
-    request.headers.forEach((value, key) => {
-      headersObj[key] = value;
-    });
-    console.log('Request headers:', headersObj);
-    console.log('Cookies received:', request.cookies.getAll());
-    
-    // Try different possible cookie names for Supabase auth token
-    const possibleCookieNames = [
-      'supabase-auth-token',
-      'sb-access-token',
-      'sb-refresh-token'
-    ];
-    let sessionToken = null;
-    for (const name of possibleCookieNames) {
-      const token = request.cookies.get(name)?.value;
-      if (token) {
-        console.log(`Found token in cookie: ${name}`);
-        sessionToken = token;
-        break;
-      }
-    }
-    
-    if (!sessionToken) {
-      console.log('No session token found in any known cookies');
-      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
-    }
-
-    // Use the session token to get user data
-    const { data: { user }, error: userError } = await supabase.auth.getUser(sessionToken);
-    if (userError || !user) {
-      console.log('Error fetching user or no user found:', userError?.message || 'No user');
-      return NextResponse.json({ error: 'Authentication required. Please log in.' }, { status: 401 });
-    }
-    const userId = user.id;
-    
     // Parse and structure recipe data
     const recipeData = {
       user_id: userId,

@@ -18,6 +18,8 @@ export default function RecipeGeneratorPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [generatedRecipe, setGeneratedRecipe] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     checkAuthStatus();
@@ -26,7 +28,12 @@ export default function RecipeGeneratorPage() {
   const checkAuthStatus = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setIsAuthenticated(!!session);
-    if (!session) {
+    if (session) {
+      setUser(session.user);
+      setSession(session);
+    } else {
+      setUser(null);
+      setSession(null);
       router.push('/login');
     }
   };
@@ -65,6 +72,10 @@ export default function RecipeGeneratorPage() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
       if (!session) {
         throw new Error('Not authenticated');
       }
@@ -115,10 +126,15 @@ export default function RecipeGeneratorPage() {
             </button>
           ) : (
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span className="text-gray-700">Welcome!</span>
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <div className="flex flex-col">
+                  <span className="text-gray-700 font-medium">{user?.user_metadata?.full_name || user?.email}</span>
+                  <span className="text-sm text-gray-500">{user?.email}</span>
+                </div>
+              </div>
             </div>
           )}
           <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
