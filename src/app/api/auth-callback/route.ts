@@ -19,8 +19,26 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
       }
 
-      // Redirect to homepage without tokens in URL
-      return NextResponse.redirect(new URL('https://s06recipeai.vercel.app'));
+      // Set session cookies manually before redirecting
+      const response = NextResponse.redirect(new URL('https://s06recipeai.vercel.app'));
+      
+      // Set access and refresh tokens as cookies
+      if (data.session) {
+        response.cookies.set('sb-access-token', data.session.access_token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+          maxAge: 60 * 60 * 24 * 7 // 1 week
+        });
+        response.cookies.set('sb-refresh-token', data.session.refresh_token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'strict',
+          maxAge: 60 * 60 * 24 * 7 // 1 week
+        });
+      }
+      
+      return response;
     } catch (err) {
       console.error('Unexpected error in auth callback:', err);
       return NextResponse.json({ error: 'Unexpected error during authentication' }, { status: 500 });
