@@ -30,14 +30,24 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
+      // Force the redirect URL to be the current origin
+      const currentOrigin = window.location.origin;
+      
+      // Include the current language in the redirect URL
+      const callbackUrl = new URL(`${currentOrigin}/`);
+      callbackUrl.searchParams.set('lang', locale);
+      
+      console.log('Email sign-in redirect URL:', callbackUrl.toString());
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
-      // Redirect to homepage or dashboard after successful login
-      router.push('/');
+      
+      // Redirect to homepage with language parameter
+      router.push(callbackUrl.toString());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during sign in.');
     } finally {
