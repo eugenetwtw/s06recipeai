@@ -34,7 +34,10 @@ export async function GET(request: Request) {
       }
 
       // Set session cookies manually before redirecting
-      const response = NextResponse.redirect(new URL('https://s06recipeai.vercel.app'));
+      // Get the origin from the request to support both local development and production
+      const requestUrl = new URL(request.url);
+      const origin = requestUrl.origin;
+      const response = NextResponse.redirect(new URL('/', origin));
       
       // Set access and refresh tokens as cookies
       if (data.session) {
