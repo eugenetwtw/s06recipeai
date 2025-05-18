@@ -117,9 +117,13 @@ export default function Home() {
   };
 
   const handleSignOut = async () => {
+    const isDemoAccount = user?.email === 'demo@demo.com';
     await supabase.auth.signOut();
     setUser(null);
-    window.location.reload();
+    
+    // Use window.location.href for a more direct redirect approach
+    // This should work more consistently in both local and deployed environments
+    window.location.href = '/sign-in';
   };
 
   const handleFileUpload = async () => {
