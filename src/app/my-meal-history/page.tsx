@@ -37,6 +37,9 @@ export default function MyMealHistoryPage() {
   const [newDish, setNewDish] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCuisine, setSelectedCuisine] = useState<string>('all');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Common cuisines for filtering
   const cuisines = [
@@ -371,6 +374,79 @@ export default function MyMealHistoryPage() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
+
+    const formData = new FormData();
+    Array.from(e.target.files).forEach((file) => {
+      formData.append('files', file);
+    });
+    formData.append('type', 'meal_history');
+
+    try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+
+      // Upload the files
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload meal history photos');
+      }
+
+      const result = await response.json();
+      setUploadSuccess(true);
+      
+      // Process the uploaded images with the meal history processing API
+      const processResponse = await fetch('/api/process-meal-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          text: "Processing uploaded meal history images",
+          userId: session.user.id
+        })
+      });
+      
+      if (!processResponse.ok) {
+        const errorData = await processResponse.json();
+        throw new Error(errorData.error || 'Failed to process meal history');
+      }
+      
+      // Refresh the meal history list
+      await fetchMealHistory();
+      
+      // Show success message
+      alert('Meal history photos uploaded successfully! AI has analyzed your photos and added the detected meals to your history.');
+    } catch (error) {
+      console.error('Error uploading meal history photos:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload meal history photos');
+      alert('Failed to upload meal history photos. Please try again.');
+    } finally {
+      setIsUploading(false);
+      // Reset the file input
+      e.target.value = '';
+    }
+  };
+
   // Helper function to get cuisine string value
   const getCuisineString = (cuisine: any): string => {
     if (typeof cuisine === 'string') {
@@ -454,13 +530,28 @@ export default function MyMealHistoryPage() {
             </select>
           </div>
           
-          <div className="w-full md:w-1/3 flex justify-end items-end">
-            <button
-              onClick={handleAddMeal}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-            >
-              Add New Meal
-            </button>
+          <div className="w-full md:w-1/3">
+            <div className="flex justify-end items-end gap-2">
+              <button
+                onClick={handleAddMeal}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+              >
+                Add New Meal
+              </button>
+              <label className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors cursor-pointer">
+                Upload Photos
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-right">
+              Upload screenshots of your UberEats order history to automatically extract and save your meal information
+            </p>
           </div>
         </div>
       </div>

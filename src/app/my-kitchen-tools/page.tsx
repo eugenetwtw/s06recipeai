@@ -32,6 +32,9 @@ export default function MyKitchenToolsPage() {
   });
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Categories for kitchen tools
   const categories = [
@@ -316,6 +319,61 @@ export default function MyKitchenToolsPage() {
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
+
+    const formData = new FormData();
+    Array.from(e.target.files).forEach((file) => {
+      formData.append('files', file);
+    });
+    formData.append('type', 'kitchen_tools');
+
+    try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+
+      // Upload the files
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload kitchen tool photos');
+      }
+
+      const result = await response.json();
+      setUploadSuccess(true);
+      
+      // Refresh the kitchen tools list
+      await fetchKitchenTools();
+      
+      // Show success message
+      alert('Kitchen tool photos uploaded successfully! AI has analyzed your photos and added the detected tools to your inventory.');
+    } catch (error) {
+      console.error('Error uploading kitchen tool photos:', error);
+      setUploadError(error instanceof Error ? error.message : 'Failed to upload kitchen tool photos');
+      alert('Failed to upload kitchen tool photos. Please try again.');
+    } finally {
+      setIsUploading(false);
+      // Reset the file input
+      e.target.value = '';
+    }
+  };
+
   // Filter tools based on search term and category
   const filteredTools = kitchenTools.filter(tool => {
     const matchesSearch = tool.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -374,13 +432,28 @@ export default function MyKitchenToolsPage() {
             </select>
           </div>
           
-          <div className="w-full md:w-1/3 flex justify-end items-end">
-            <button
-              onClick={handleAddTool}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-            >
-              Add New Tool
-            </button>
+          <div className="w-full md:w-1/3">
+            <div className="flex justify-end items-end gap-2">
+              <button
+                onClick={handleAddTool}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+              >
+                Add New Tool
+              </button>
+              <label className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors cursor-pointer">
+                Upload Photos
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2 text-right">
+              Upload photos of your kitchen tools to automatically identify and add them to your inventory
+            </p>
           </div>
         </div>
       </div>
