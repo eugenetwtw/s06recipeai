@@ -368,7 +368,7 @@ export default function MyKitchenToolsPage() {
     }
 
     setIsUploading(true);
-    setProcessingStatus('Preparing to upload files...');
+    setProcessingStatus(t('myKitchenTools.preparingUpload'));
     setUploadError(null);
     setUploadSuccess(false);
 
@@ -385,7 +385,7 @@ export default function MyKitchenToolsPage() {
         throw new Error('Authentication required');
       }
 
-      setProcessingStatus('Uploading photos to server...');
+      setProcessingStatus(t('myKitchenTools.uploadingPhotos'));
       // Upload the files
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -403,23 +403,23 @@ export default function MyKitchenToolsPage() {
       const result = await response.json();
       setUploadSuccess(true);
       
-      setProcessingStatus('AI is analyzing your kitchen tools...');
+      setProcessingStatus(t('myKitchenTools.analyzingTools'));
       setIsProcessing(true);
       
       // Artificial delay to show processing message (AI analysis happens on server)
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      setProcessingStatus('Updating your kitchen tools inventory...');
+      setProcessingStatus(t('myKitchenTools.updatingInventory'));
       // Refresh the kitchen tools list
       await fetchKitchenTools();
       
       setIsProcessing(false);
       // Show success message
-      alert('Kitchen tool photos uploaded successfully! AI has analyzed your photos and added the detected tools to your inventory.');
+      alert(t('myKitchenTools.uploadSuccess'));
     } catch (error) {
       console.error('Error uploading kitchen tool photos:', error);
       setUploadError(error instanceof Error ? error.message : 'Failed to upload kitchen tool photos');
-      alert('Failed to upload kitchen tool photos. Please try again.');
+      alert(t('myKitchenTools.uploadError'));
     } finally {
       setIsUploading(false);
       setIsProcessing(false);
@@ -463,24 +463,24 @@ export default function MyKitchenToolsPage() {
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="w-full md:w-1/3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search Tools</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('myKitchenTools.searchTools')}</label>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name..."
+              placeholder={t('myKitchenTools.searchByName')}
               className="w-full p-2 border rounded"
             />
           </div>
           
           <div className="w-full md:w-1/3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('myKitchenTools.filterByCategory')}</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full p-2 border rounded"
             >
-              <option value="all">All Categories</option>
+              <option value="all">{t('myKitchenTools.allCategories')}</option>
               {categories.map(category => (
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
@@ -514,7 +514,7 @@ export default function MyKitchenToolsPage() {
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-right">
-              Upload photos of your kitchen tools to automatically identify and add them to your inventory
+              {t('myKitchenTools.uploadDescription')}
             </p>
           </div>
         </div>

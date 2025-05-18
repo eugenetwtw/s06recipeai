@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/i18n/I18nContext';
 
 interface MealHistoryItem {
   id: string;
@@ -20,6 +21,7 @@ interface MealHistoryItem {
 
 export default function MyMealHistoryPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [mealHistory, setMealHistory] = useState<MealHistoryItem[]>([]);
@@ -423,7 +425,7 @@ export default function MyMealHistoryPage() {
     }
 
     setIsUploading(true);
-    setProcessingStatus('Preparing to upload files...');
+      setProcessingStatus(t('myMealHistory.preparingUpload'));
     setUploadError(null);
     setUploadSuccess(false);
 
@@ -440,7 +442,7 @@ export default function MyMealHistoryPage() {
         throw new Error('Authentication required');
       }
 
-      setProcessingStatus('Uploading photos to server...');
+      setProcessingStatus(t('myMealHistory.uploadingPhotos'));
       // Upload the files
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -458,7 +460,7 @@ export default function MyMealHistoryPage() {
       const result = await response.json();
       setUploadSuccess(true);
       
-      setProcessingStatus('AI is analyzing your meal photos...');
+      setProcessingStatus(t('myMealHistory.analyzingMeals'));
       setIsProcessing(true);
       
       // Process the uploaded images with the meal history processing API
@@ -479,17 +481,17 @@ export default function MyMealHistoryPage() {
         throw new Error(errorData.error || 'Failed to process meal history');
       }
       
-      setProcessingStatus('Updating your meal history...');
+      setProcessingStatus(t('myMealHistory.updatingHistory'));
       // Refresh the meal history list
       await fetchMealHistory();
       
       setIsProcessing(false);
       // Show success message
-      alert('Meal history photos uploaded successfully! AI has analyzed your photos and added the detected meals to your history.');
+      alert(t('myMealHistory.uploadSuccess'));
     } catch (error) {
       console.error('Error uploading meal history photos:', error);
       setUploadError(error instanceof Error ? error.message : 'Failed to upload meal history photos');
-      alert('Failed to upload meal history photos. Please try again.');
+      alert(t('myMealHistory.uploadError'));
     } finally {
       setIsUploading(false);
       setIsProcessing(false);
@@ -564,7 +566,7 @@ export default function MyMealHistoryPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-indigo-700">My Meal History</h1>
+        <h1 className="text-3xl font-bold text-indigo-700">{t('myMealHistory.title')}</h1>
         <div className="flex items-center gap-4">
           {user && (
             <div className="flex items-center gap-2">
@@ -579,7 +581,7 @@ export default function MyMealHistoryPage() {
             </div>
           )}
           <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
-            Back to Homepage
+            {t('common.backToHome')}
           </a>
         </div>
       </div>
@@ -588,24 +590,24 @@ export default function MyMealHistoryPage() {
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="w-full md:w-1/3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search Meals</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('myMealHistory.searchMeals')}</label>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, restaurant, or dish..."
+              placeholder={t('myMealHistory.searchPlaceholder')}
               className="w-full p-2 border rounded"
             />
           </div>
           
           <div className="w-full md:w-1/3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter by Cuisine</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('myMealHistory.filterByCuisine')}</label>
             <select
               value={selectedCuisine}
               onChange={(e) => setSelectedCuisine(e.target.value)}
               className="w-full p-2 border rounded"
             >
-              <option value="all">All Cuisines</option>
+              <option value="all">{t('myMealHistory.allCuisines')}</option>
               {cuisines.map(cuisine => (
                 <option key={cuisine.id} value={cuisine.id}>{cuisine.name}</option>
               ))}
@@ -618,10 +620,10 @@ export default function MyMealHistoryPage() {
                 onClick={handleAddMeal}
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
               >
-                Add New Meal
+                {t('myMealHistory.addMeal')}
               </button>
               <label className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors cursor-pointer">
-                Upload Photos
+                {t('myMealHistory.uploadPhotos')}
                 <input
                   type="file"
                   accept="image/*"
@@ -633,13 +635,13 @@ export default function MyMealHistoryPage() {
               <button
                 onClick={handleDeleteAllMeals}
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                title="Delete all meal history entries"
+                title={t('myMealHistory.deleteAllTitle')}
               >
-                Delete All
+                {t('myMealHistory.deleteAll')}
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-right">
-              Upload screenshots of your UberEats order history to automatically extract and save your meal information
+              {t('myMealHistory.uploadDescription')}
             </p>
           </div>
         </div>
@@ -663,7 +665,7 @@ export default function MyMealHistoryPage() {
 
       {/* Meal History List */}
       <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4 text-indigo-700">Your Meal History</h2>
+        <h2 className="text-xl font-semibold mb-4 text-indigo-700">{t('myMealHistory.title')}</h2>
         
         {isLoading ? (
           <div className="text-center py-8">
@@ -671,11 +673,11 @@ export default function MyMealHistoryPage() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p className="mt-2 text-gray-600">Loading your meal history...</p>
+            <p className="mt-2 text-gray-600">{t('myMealHistory.loading')}</p>
           </div>
         ) : sortedMeals.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No meal history found. Add some meals to get started!</p>
+            <p className="text-gray-600">{t('myMealHistory.noMeals')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

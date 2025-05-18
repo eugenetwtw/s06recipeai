@@ -119,7 +119,7 @@ export default function MyGeneratedRecipesPage() {
       setEditingRecipe(null);
     } catch (error) {
       console.error('Error saving recipe:', error);
-      alert('Failed to save recipe. Please try again.');
+      alert(t('myGeneratedRecipes.saveError'));
     }
   };
 
@@ -152,7 +152,7 @@ export default function MyGeneratedRecipesPage() {
       setRecipes(prevRecipes => prevRecipes.filter(recipe => recipe.id !== id));
     } catch (error) {
       console.error('Error deleting recipe:', error);
-      alert('Failed to delete recipe. Please try again.');
+      alert(t('myGeneratedRecipes.deleteError'));
     }
   };
 
@@ -197,13 +197,13 @@ export default function MyGeneratedRecipesPage() {
       );
     } catch (error) {
       console.error('Error updating recipe:', error);
-      alert('Failed to update recipe. Please try again.');
+      alert(t('myGeneratedRecipes.updateError'));
     }
   };
 
   const handleDeleteAllRecipes = async () => {
     // Confirm with the user before deleting all recipes
-    if (!confirm('Are you sure you want to delete ALL generated recipes? This action cannot be undone.')) {
+    if (!confirm(t('myGeneratedRecipes.deleteAllConfirmation'))) {
       return;
     }
     
@@ -231,10 +231,10 @@ export default function MyGeneratedRecipesPage() {
       setRecipes([]);
       
       // Show success message
-      alert('All generated recipes have been deleted successfully.');
+      alert(t('myGeneratedRecipes.deleteAllSuccess'));
     } catch (error) {
       console.error('Error deleting all recipes:', error);
-      alert('Failed to delete all recipes. Please try again.');
+      alert(t('myGeneratedRecipes.deleteAllError'));
     }
   };
 
@@ -260,7 +260,7 @@ export default function MyGeneratedRecipesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-indigo-700">My Generated Recipes</h1>
+        <h1 className="text-3xl font-bold text-indigo-700">{t('myGeneratedRecipes.title')}</h1>
         <div className="flex items-center gap-4">
           {user && (
             <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ export default function MyGeneratedRecipesPage() {
             </div>
           )}
           <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
-            Back to Homepage
+            {t('common.backToHome')}
           </a>
         </div>
       </div>
@@ -284,25 +284,25 @@ export default function MyGeneratedRecipesPage() {
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="w-full md:w-1/2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search Recipes</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('myGeneratedRecipes.searchRecipes')}</label>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, ingredients, or instructions..."
+              placeholder={t('myGeneratedRecipes.searchPlaceholder')}
               className="w-full p-2 border rounded"
             />
           </div>
           
           <div className="w-full md:w-1/2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Filter</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('myGeneratedRecipes.filter')}</label>
             <select
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
               className="w-full p-2 border rounded"
             >
-              <option value="all">All Recipes</option>
-              <option value="favorites">Favorites Only</option>
+              <option value="all">{t('myGeneratedRecipes.allRecipes')}</option>
+              <option value="favorites">{t('myGeneratedRecipes.favoritesOnly')}</option>
             </select>
           </div>
           
@@ -311,14 +311,14 @@ export default function MyGeneratedRecipesPage() {
               href="/recipe-generator"
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
             >
-              Generate New Recipe
+              {t('myGeneratedRecipes.generateRecipe')}
             </a>
             <button
               onClick={handleDeleteAllRecipes}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-              title="Delete all generated recipes"
+              title={t('myGeneratedRecipes.deleteAllTitle')}
             >
-              Delete All
+              {t('myGeneratedRecipes.deleteAll')}
             </button>
           </div>
         </div>
@@ -326,7 +326,7 @@ export default function MyGeneratedRecipesPage() {
 
       {/* Recipe List */}
       <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4 text-indigo-700">Your Generated Recipes</h2>
+        <h2 className="text-xl font-semibold mb-4 text-indigo-700">{t('myGeneratedRecipes.yourRecipes')}</h2>
         
         {isLoading ? (
           <div className="text-center py-8">
@@ -334,11 +334,11 @@ export default function MyGeneratedRecipesPage() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p className="mt-2 text-gray-600">Loading your recipes...</p>
+            <p className="mt-2 text-gray-600">{t('common.loading')}</p>
           </div>
         ) : sortedRecipes.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No recipes found. Generate some recipes to get started!</p>
+            <p className="text-gray-600">{t('myGeneratedRecipes.noRecipes')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -355,17 +355,17 @@ export default function MyGeneratedRecipesPage() {
                 </div>
                 
                 <div className="mt-2 text-sm text-gray-600">
-                  <p>Generated: <span className="font-medium">{new Date(recipe.generatedAt).toLocaleDateString()}</span></p>
+                  <p>{t('myGeneratedRecipes.generated')}: <span className="font-medium">{new Date(recipe.generatedAt).toLocaleDateString()}</span></p>
                   
                   {recipe.ingredients && recipe.ingredients.length > 0 && (
                     <div className="mt-2">
-                      <p className="font-medium">Ingredients:</p>
+                      <p className="font-medium">{t('myGeneratedRecipes.ingredients')}:</p>
                       <ul className="list-disc pl-5">
                         {recipe.ingredients.slice(0, 5).map((ingredient, index) => (
                           <li key={index}>{ingredient}</li>
                         ))}
                         {recipe.ingredients.length > 5 && (
-                          <li className="italic">...and {recipe.ingredients.length - 5} more</li>
+                          <li className="italic">{t('myGeneratedRecipes.andMore', { count: recipe.ingredients.length - 5 })}</li>
                         )}
                       </ul>
                     </div>
@@ -373,7 +373,7 @@ export default function MyGeneratedRecipesPage() {
                   
                   {recipe.instructions && (
                     <div className="mt-2">
-                      <p className="font-medium">Instructions:</p>
+                      <p className="font-medium">{t('myGeneratedRecipes.instructions')}:</p>
                       <p className="line-clamp-3 italic">
                         {typeof recipe.instructions === 'string' 
                           ? recipe.instructions.substring(0, 150) + '...'
@@ -385,7 +385,7 @@ export default function MyGeneratedRecipesPage() {
                   )}
                   
                   {recipe.notes && (
-                    <p className="mt-2">Notes: <span className="italic">{recipe.notes}</span></p>
+                    <p className="mt-2">{t('myGeneratedRecipes.notes')}: <span className="italic">{recipe.notes}</span></p>
                   )}
                 </div>
                 
@@ -394,13 +394,13 @@ export default function MyGeneratedRecipesPage() {
                     onClick={() => handleEditRecipe(recipe)}
                     className="text-indigo-600 hover:text-indigo-800"
                   >
-                    Edit
+                    {t('myGeneratedRecipes.edit')}
                   </button>
                   <button
                     onClick={() => handleDeleteRecipe(recipe.id)}
                     className="text-red-600 hover:text-red-800"
                   >
-                    Delete
+                    {t('myGeneratedRecipes.delete')}
                   </button>
                 </div>
               </div>
@@ -413,11 +413,11 @@ export default function MyGeneratedRecipesPage() {
       {isEditing && editingRecipe && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">Edit Recipe</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('myGeneratedRecipes.editRecipe')}</h2>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Recipe Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('myGeneratedRecipes.recipeName')}</label>
                 <input
                   type="text"
                   value={editingRecipe.name}
@@ -427,7 +427,7 @@ export default function MyGeneratedRecipesPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('myGeneratedRecipes.ingredients')}</label>
                 <textarea
                   value={editingRecipe.ingredients.join('\n')}
                   onChange={(e) => setEditingRecipe({
@@ -440,7 +440,7 @@ export default function MyGeneratedRecipesPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('myGeneratedRecipes.instructions')}</label>
                 <textarea
                   value={editingRecipe.instructions}
                   onChange={(e) => setEditingRecipe({...editingRecipe, instructions: e.target.value})}
@@ -449,12 +449,12 @@ export default function MyGeneratedRecipesPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('myGeneratedRecipes.notes')}</label>
                 <textarea
                   value={editingRecipe.notes || ''}
                   onChange={(e) => setEditingRecipe({...editingRecipe, notes: e.target.value})}
                   className="w-full p-2 border rounded h-24"
-                  placeholder="Add any notes about this recipe"
+                  placeholder={t('myGeneratedRecipes.addNotes')}
                 />
               </div>
               
@@ -465,7 +465,7 @@ export default function MyGeneratedRecipesPage() {
                   onChange={(e) => setEditingRecipe({...editingRecipe, isFavorite: e.target.checked})}
                   className="mr-2"
                 />
-                <label>Mark as favorite</label>
+                <label>{t('myGeneratedRecipes.markAsFavorite')}</label>
               </div>
             </div>
             
@@ -474,13 +474,13 @@ export default function MyGeneratedRecipesPage() {
                 onClick={() => setIsEditing(false)}
                 className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100"
               >
-                Cancel
+                {t('myGeneratedRecipes.cancel')}
               </button>
               <button
                 onClick={handleSaveEdit}
                 className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
               >
-                Save Changes
+                {t('myGeneratedRecipes.saveChanges')}
               </button>
             </div>
           </div>

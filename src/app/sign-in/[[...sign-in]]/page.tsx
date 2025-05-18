@@ -146,7 +146,7 @@ export default function SignInPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-              placeholder="Enter your email"
+              placeholder={t('auth.signIn.emailPlaceholder')}
             />
           </div>
           <div className="mb-4">
@@ -159,7 +159,7 @@ export default function SignInPage() {
               required
               minLength={4}
               className="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-              placeholder="Enter your password"
+              placeholder={t('auth.signIn.passwordPlaceholder')}
             />
           </div>
           {error && (
