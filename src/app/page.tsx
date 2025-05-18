@@ -11,6 +11,9 @@ export default function Home() {
   const [mealHistoryText, setMealHistoryText] = useState<string>('');
   const [processingText, setProcessingText] = useState<boolean>(false);
   const [processingSeconds, setProcessingSeconds] = useState<number>(0);
+  const [kitchenToolsText, setKitchenToolsText] = useState<string>('');
+  const [processingKitchenToolsText, setProcessingKitchenToolsText] = useState<boolean>(false);
+  const [processingKitchenToolsSeconds, setProcessingKitchenToolsSeconds] = useState<number>(0);
 
   const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
@@ -46,6 +49,22 @@ export default function Home() {
       if (timer) clearInterval(timer);
     };
   }, [processingText]);
+
+  useEffect(() => {
+    let timerKitchen: NodeJS.Timeout | null = null;
+    if (processingKitchenToolsText) {
+      setProcessingKitchenToolsSeconds(0);
+      timerKitchen = setInterval(() => {
+        setProcessingKitchenToolsSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setProcessingKitchenToolsSeconds(0);
+      if (timerKitchen) clearInterval(timerKitchen);
+    }
+    return () => {
+      if (timerKitchen) clearInterval(timerKitchen);
+    };
+  }, [processingKitchenToolsText]);
 
   useEffect(() => {
     // Fetch current session and user preferences
@@ -281,6 +300,28 @@ export default function Home() {
     }
   };
 
+  const handleProcessKitchenTools = async () => {
+    if (!kitchenToolsText.trim() || !user) return;
+    setProcessingKitchenToolsText(true);
+    try {
+      const response = await fetch('/api/process-kitchen-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: kitchenToolsText, userId: user.id })
+      });
+      const result = await response.json();
+      console.log(result);
+      if (user) {
+        fetchUserData(user.id);
+        setKitchenToolsText('');
+      }
+    } catch (error) {
+      console.error('Kitchen tools processing failed', error);
+    } finally {
+      setProcessingKitchenToolsText(false);
+    }
+  };
+
   const handleGenerateRecipe = async () => {
     try {
       const response = await fetch('/api/generate-recipe', {
@@ -454,7 +495,8 @@ export default function Home() {
                       </button>
                     </div>
                   </>
-                ) : (
+                ) : uploadType === 'kitchen_tools' ? (
+                <>
                   <div className="flex flex-col md:flex-row gap-4">
                     <input
                       type="file"
@@ -469,6 +511,38 @@ export default function Home() {
                       Choose photos to upload
                     </button>
                   </div>
+                  <div className="mt-4">
+                    <p className="text-gray-700 mb-2">Or paste text of your kitchen tools:</p>
+                    <textarea
+                      value={kitchenToolsText}
+                      onChange={(e) => setKitchenToolsText(e.target.value)}
+                      className="input-primary w-full h-32"
+                      placeholder="Paste your kitchen tools list here..."
+                    />
+                    <button
+                      onClick={handleProcessKitchenTools}
+                      disabled={processingKitchenToolsText || !kitchenToolsText.trim()}
+                      className="btn-secondary w-full mt-2"
+                    >
+                      {processingKitchenToolsText ? `Processing... (${processingKitchenToolsSeconds}s)` : 'Process Text'}
+                    </button>
+                  </div>
+                </>
+                ) : (
+                <div className="flex flex-col md:flex-row gap-4">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
+                    className="input-primary flex-1"
+                  />
+                  <button
+                    onClick={handleFileUpload}
+                    className="btn-primary"
+                  >
+                    Choose photos to upload
+                  </button>
+                </div>
                 )}
               </div>
             </div>
