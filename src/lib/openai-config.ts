@@ -37,12 +37,19 @@ export class OpenAIService {
     
     try {
       const response = await openai.chat.completions.create({
+        model: 'gpt-4.1',
         messages: [
           {
             role: 'user',
             content: [
               { type: 'text', text: 'Describe the contents of this image in detail' },
-              { type: 'image_url', image_url: { url: imageUrl } }
+              { 
+                type: 'image_url',
+                image_url: { 
+                  url: imageUrl,
+                  detail: 'high' 
+                }
+              }
             ]
           }
         ],
