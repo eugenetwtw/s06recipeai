@@ -43,7 +43,13 @@ export async function GET(request: Request) {
       // Set session cookies manually before redirecting
       // Get the origin from the request to support both local development and production
       const requestUrl = new URL(request.url);
-      const origin = requestUrl.origin;
+      
+      // Use the redirect_to or origin parameter if provided, otherwise use the request origin
+      const redirectTo = requestUrl.searchParams.get('redirect_to');
+      const originalOrigin = requestUrl.searchParams.get('origin');
+      const origin = redirectTo || originalOrigin || requestUrl.origin;
+      
+      console.log('Auth callback redirecting to origin:', origin);
       
       // Preserve the language parameter if it exists in the request
       const lang = requestUrl.searchParams.get('lang') || 'en';
@@ -82,7 +88,15 @@ export async function GET(request: Request) {
   // If we don't have a code but we might have tokens in the URL fragment
   // We'll redirect to the homepage with the language parameter
   // The client-side code will handle extracting tokens from the URL fragment
-  const redirectUrl = new URL('/', url.origin);
+  
+  // Use the redirect_to or origin parameter if provided, otherwise use the request origin
+  const redirectTo = url.searchParams.get('redirect_to');
+  const originalOrigin = url.searchParams.get('origin');
+  const origin = redirectTo || originalOrigin || url.origin;
+  
+  console.log('Auth callback (no code) redirecting to origin:', origin);
+  
+  const redirectUrl = new URL('/', origin);
   redirectUrl.searchParams.set('lang', lang);
   
   return NextResponse.redirect(redirectUrl);

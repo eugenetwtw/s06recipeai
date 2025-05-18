@@ -30,15 +30,37 @@ export default function AuthHandler() {
             } else {
               console.log('Session set successfully');
               
-              // Clear the hash from the URL without triggering a navigation
-              window.history.replaceState(
-                {},
-                document.title,
-                window.location.pathname + window.location.search
-              );
+              // Get the redirect_to or origin parameter from the URL if it exists
+              const urlParams = new URLSearchParams(window.location.search);
+              const redirectTo = urlParams.get('redirect_to');
+              const origin = urlParams.get('origin');
+              const targetOrigin = redirectTo || origin;
               
-              // Refresh the page to update the UI
-              router.refresh();
+              console.log('AuthHandler detected tokens, target origin:', targetOrigin);
+              
+              // If we have a target origin parameter and it's different from the current origin,
+              // redirect to that origin
+              if (targetOrigin && targetOrigin !== window.location.origin) {
+                // Construct the URL to redirect to
+                const redirectUrl = new URL('/', targetOrigin);
+                // Preserve the language parameter
+                const lang = urlParams.get('lang');
+                if (lang) {
+                  redirectUrl.searchParams.set('lang', lang);
+                }
+                // Redirect to the original origin
+                window.location.href = redirectUrl.toString();
+              } else {
+                // Clear the hash from the URL without triggering a navigation
+                window.history.replaceState(
+                  {},
+                  document.title,
+                  window.location.pathname + window.location.search
+                );
+                
+                // Refresh the page to update the UI
+                router.refresh();
+              }
             }
           });
         }

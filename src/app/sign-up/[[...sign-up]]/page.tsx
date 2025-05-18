@@ -41,14 +41,25 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
+      // Force the redirect URL to be the current origin
+      const currentOrigin = window.location.origin;
+      
       // Include the current language in the redirect URL
-      const callbackUrl = new URL(`${window.location.origin}/api/auth-callback`);
+      const callbackUrl = new URL(`${currentOrigin}/api/auth-callback`);
       callbackUrl.searchParams.set('lang', locale);
+      
+      console.log('Google sign-up redirect URL:', callbackUrl.toString());
+      console.log('Current origin:', currentOrigin);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: callbackUrl.toString(),
+          queryParams: {
+            // Add additional query params to force the redirect back to the current origin
+            redirect_to: currentOrigin,
+            origin: currentOrigin,
+          }
         },
       });
 
