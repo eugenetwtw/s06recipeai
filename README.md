@@ -42,3 +42,4 @@ npm run dev
 ## Security
 - Row-level security in Supabase
 - Secure image uploads and analysis
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/eugenetwtw/s06recipeai?utm_source=oss&utm_medium=github&utm_campaign=eugenetwtw%2Fs06recipeai&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
