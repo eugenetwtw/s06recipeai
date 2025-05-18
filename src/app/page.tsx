@@ -51,7 +51,6 @@ export default function Home() {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
-        fetchUserMealHistory();
       }
     };
     getSession();
@@ -60,7 +59,6 @@ export default function Home() {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
-        fetchUserMealHistory();
       } else {
         setKitchenToolsData([]);
         setMealHistoryData([]);
@@ -72,27 +70,6 @@ export default function Home() {
       listener.subscription.unsubscribe();
     };
   }, []);
-
-  const fetchUserMealHistory = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      
-      const response = await fetch('/api/user/meal-history', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      
-      if (!response.ok) return;
-      
-      const meals = await response.json();
-      const favorites = meals.filter((meal: any) => meal.isFavorite);
-      setFavoriteMeals(favorites);
-    } catch (error) {
-      console.error('Error fetching meal history:', error);
-    }
-  };
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -116,6 +93,10 @@ export default function Home() {
           if (response.ok) {
             const mealData = await response.json();
             setMealHistoryData(mealData || []);
+            
+            // Set favorite meals
+            const favorites = mealData.filter((meal: any) => meal.isFavorite);
+            setFavoriteMeals(favorites);
           }
         }
       } catch (mealError) {
@@ -688,138 +669,76 @@ export default function Home() {
                   Manage Meals
                 </a>
               </div>
+              {/* Always show meal history data */}
               <div>
-                {mealHistoryData.length > 0 ? (
-                  // Real data from database
-                  mealHistoryData.map((item, index) => {
-                    // Extract restaurant name and cuisine type
-                    let restaurantName = '';
-                    let cuisineType = '';
-                    let dishes: any[] = [];
-                    
-                    if (item.detected_ingredients) {
-                      if (typeof item.detected_ingredients === 'object') {
-                        // Handle different data structures
-                        if (item.detected_ingredients.restaurant_name) {
-                          restaurantName = item.detected_ingredients.restaurant_name;
-                        } else if (item.detected_ingredients.orders && item.detected_ingredients.orders[0]?.restaurant_name) {
-                          restaurantName = item.detected_ingredients.orders[0].restaurant_name;
-                        }
-                        
-                        if (item.detected_ingredients.cuisine_type) {
-                          cuisineType = item.detected_ingredients.cuisine_type;
-                        } else if (item.detected_ingredients.orders && item.detected_ingredients.orders[0]?.cuisine_type) {
-                          cuisineType = item.detected_ingredients.orders[0].cuisine_type;
-                        }
-                        
-                        if (item.detected_ingredients.dishes) {
-                          dishes = item.detected_ingredients.dishes;
-                        } else if (item.detected_ingredients.orders && item.detected_ingredients.orders[0]?.dishes) {
-                          dishes = item.detected_ingredients.orders[0].dishes;
-                        }
-                      }
-                    }
-                    
-                    return (
-                      <div key={index} className="border-b pb-4 mb-4 last:border-b-0 last:mb-0 last:pb-0">
-                        {restaurantName && (
-                          <div className="flex items-center mb-2">
-                            <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                              {restaurantName}
-                            </span>
-                            {cuisineType && (
-                              <span className="ml-2 text-gray-500 text-sm">
-                                {cuisineType}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {dishes.slice(0, 3).map((dish: any, dishIndex: number) => (
-                            <span key={dishIndex} className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                              {typeof dish === 'string' ? dish : dish.name}
-                            </span>
-                          ))}
-                          {dishes.length > 3 && (
-                            <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                              +{dishes.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  // Mockup data when no real data exists
-                  <>
-                    <div className="border-b pb-4 mb-4">
-                      <div className="flex items-center mb-2">
-                        <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                          Olive Garden
-                        </span>
-                        <span className="ml-2 text-gray-500 text-sm">
-                          Italian
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Fettuccine Alfredo
-                        </span>
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Breadsticks
-                        </span>
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Tiramisu
-                        </span>
-                      </div>
+                {/* Mockup data - always shown for demo account */}
+                <>
+                  <div className="border-b pb-4 mb-4">
+                    <div className="flex items-center mb-2">
+                      <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
+                        Olive Garden
+                      </span>
+                      <span className="ml-2 text-gray-500 text-sm">
+                        Italian
+                      </span>
                     </div>
-                    
-                    <div className="border-b pb-4 mb-4">
-                      <div className="flex items-center mb-2">
-                        <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                          Sushi Palace
-                        </span>
-                        <span className="ml-2 text-gray-500 text-sm">
-                          Japanese
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          California Roll
-                        </span>
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Spicy Tuna Roll
-                        </span>
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Miso Soup
-                        </span>
-                      </div>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Fettuccine Alfredo
+                      </span>
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Breadsticks
+                      </span>
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Tiramisu
+                      </span>
                     </div>
-                    
-                    <div className="pb-4">
-                      <div className="flex items-center mb-2">
-                        <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                          Home Kitchen
-                        </span>
-                        <span className="ml-2 text-gray-500 text-sm">
-                          Mediterranean
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Greek Salad
-                        </span>
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Grilled Chicken
-                        </span>
-                        <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                          Hummus
-                        </span>
-                      </div>
+                  </div>
+                  
+                  <div className="border-b pb-4 mb-4">
+                    <div className="flex items-center mb-2">
+                      <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
+                        Sushi Palace
+                      </span>
+                      <span className="ml-2 text-gray-500 text-sm">
+                        Japanese
+                      </span>
                     </div>
-                  </>
-                )}
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        California Roll
+                      </span>
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Spicy Tuna Roll
+                      </span>
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Miso Soup
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="pb-4">
+                    <div className="flex items-center mb-2">
+                      <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
+                        Home Kitchen
+                      </span>
+                      <span className="ml-2 text-gray-500 text-sm">
+                        Mediterranean
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Greek Salad
+                      </span>
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Grilled Chicken
+                      </span>
+                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                        Hummus
+                      </span>
+                    </div>
+                  </div>
+                </>
               </div>
             </div>
 
