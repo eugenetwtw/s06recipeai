@@ -274,7 +274,7 @@ export default function MyGeneratedRecipesPage() {
               </div>
             </div>
           )}
-          <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
+          <a href={useI18n().getLocalizedUrl('/')} className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
             {t('common.backToHome')}
           </a>
         </div>
@@ -308,7 +308,7 @@ export default function MyGeneratedRecipesPage() {
           
           <div className="w-full md:w-1/3 flex justify-end items-end gap-2">
             <a
-              href="/recipe-generator"
+              href={useI18n().getLocalizedUrl('/recipe-generator')}
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
             >
               {t('myGeneratedRecipes.generateRecipe')}

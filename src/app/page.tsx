@@ -358,8 +358,8 @@ export default function Home() {
               </div>
             ) : (
               <div className="flex space-x-3">
-                <a href={`/sign-in?lang=${useI18n().locale}`} className="bg-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">{t('common.signIn')}</a>
-                <a href={`/sign-up?lang=${useI18n().locale}`} className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors">{t('common.signUp')}</a>
+                <a href={useI18n().getLocalizedUrl('/sign-in')} className="bg-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">{t('common.signIn')}</a>
+                <a href={useI18n().getLocalizedUrl('/sign-up')} className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors">{t('common.signUp')}</a>
               </div>
             )}
           </div>

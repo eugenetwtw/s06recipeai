@@ -20,7 +20,15 @@ export function middleware(request: NextRequest) {
   // But only do this for the initial page load, not for subsequent navigation
   const isInitialPageLoad = !request.headers.get('referer')?.includes(request.nextUrl.origin);
   
-  if (!langParam && !isApiRoute && !isStaticAsset && !isAuthCallback && isInitialPageLoad) {
+  // Check for a cookie with the preferred language
+  const preferredLanguage = request.cookies.get('preferred-language')?.value;
+  
+  // Only redirect if:
+  // 1. No language parameter is present
+  // 2. It's not an API route, auth callback, or static asset
+  // 3. It's the initial page load (not navigation within the site)
+  // 4. There's no preferred language cookie
+  if (!langParam && !isApiRoute && !isStaticAsset && !isAuthCallback && isInitialPageLoad && !preferredLanguage) {
     // Get the preferred language from the Accept-Language header
     const acceptLanguage = request.headers.get('accept-language') || '';
     
@@ -51,20 +59,17 @@ export function middleware(request: NextRequest) {
     // Create a new URL with the detected language
     const newUrl = new URL(request.nextUrl);
     
-    // Special handling for recipe-generator page - preserve the pathname
-    const isRecipeGenerator = pathname.startsWith('/recipe-generator');
+    // Preserve the original pathname for all pages
+    newUrl.searchParams.set('lang', detectedLocale);
     
-    if (isRecipeGenerator) {
-      // For recipe-generator, just add the lang parameter without changing the pathname
-      newUrl.searchParams.set('lang', detectedLocale);
-    } else {
-      // For other pages, redirect to root with lang parameter
-      newUrl.pathname = '/';
-      newUrl.searchParams.set('lang', detectedLocale);
-    }
+    // Set a cookie with the detected language
+    const response = NextResponse.redirect(newUrl);
+    response.cookies.set('preferred-language', detectedLocale, {
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      path: '/',
+    });
     
-    // Redirect to the new URL with the language parameter
-    return NextResponse.redirect(newUrl);
+    return response;
   }
   
   // Continue with the request

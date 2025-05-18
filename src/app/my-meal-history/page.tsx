@@ -580,7 +580,7 @@ export default function MyMealHistoryPage() {
               </div>
             </div>
           )}
-          <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
+          <a href={useI18n().getLocalizedUrl('/')} className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
             {t('common.backToHome')}
           </a>
         </div>

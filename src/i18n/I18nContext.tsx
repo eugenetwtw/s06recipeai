@@ -58,11 +58,42 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
   
   const [locale, setLocaleState] = useState<string>(getInitialLocale());
   
-  // After initial render, check browser language if no lang parameter was provided
+  // After initial render, check for language preference in this order:
+  // 1. URL parameter
+  // 2. localStorage
+  // 3. Cookie
+  // 4. Browser language
   useEffect(() => {
-    if (!searchParams.get('lang') && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
+      // If URL parameter exists, use it (this is already handled in getInitialLocale)
+      const urlLocale = searchParams.get('lang');
+      if (urlLocale && Object.keys(locales).includes(urlLocale)) {
+        return; // URL parameter takes precedence
+      }
+      
+      // Check localStorage
+      const storedLanguage = localStorage.getItem('preferred-language');
+      if (storedLanguage && Object.keys(locales).includes(storedLanguage)) {
+        setLocaleState(storedLanguage);
+        return;
+      }
+      
+      // Check cookies
+      const getCookie = (name: string): string | undefined => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return undefined;
+      };
+      
+      const cookieLanguage = getCookie('preferred-language');
+      if (cookieLanguage && Object.keys(locales).includes(cookieLanguage)) {
+        setLocaleState(cookieLanguage);
+        return;
+      }
+      
+      // Finally, check browser language
       const browserLocale = navigator.language;
-      // Check for Chinese variants
       if (browserLocale.startsWith('zh-')) {
         setLocaleState('zh-Hant');
       }
@@ -110,20 +141,15 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
     localStorage.setItem('preferred-language', locale);
   }, [locale, pathname, searchParams]);
   
-  // Load the preferred language from localStorage on initial render
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedLanguage = localStorage.getItem('preferred-language');
-      if (storedLanguage && Object.keys(locales).includes(storedLanguage)) {
-        setLocaleState(storedLanguage);
-      }
-    }
-  }, []);
   
   // Set locale and update URL
   const setLocale = (newLocale: string) => {
     if (Object.keys(locales).includes(newLocale)) {
+      // Set the locale state
       setLocaleState(newLocale);
+      
+      // Also set a cookie for server-side detection
+      document.cookie = `preferred-language=${newLocale};max-age=${60 * 60 * 24 * 365};path=/`;
     }
   };
   
@@ -188,4 +214,21 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
 };
 
 // Custom hook to use the i18n context
-export const useI18n = () => useContext(I18nContext);
+export const useI18n = () => {
+  const context = useContext(I18nContext);
+  
+  // Add a utility function to generate URLs with the current language parameter
+  const getLocalizedUrl = (path: string): string => {
+    // If the path already has a query string, append the language parameter
+    if (path.includes('?')) {
+      return `${path}&lang=${context.locale}`;
+    }
+    // Otherwise, add the language parameter as the first query parameter
+    return `${path}?lang=${context.locale}`;
+  };
+  
+  return {
+    ...context,
+    getLocalizedUrl
+  };
+};
