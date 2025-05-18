@@ -380,6 +380,43 @@ export default function MyMealHistoryPage() {
     }
   };
 
+  const handleDeleteAllMeals = async () => {
+    // Confirm with the user before deleting all meal history
+    if (!confirm('Are you sure you want to delete ALL meal history entries? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+      
+      // Call the delete-all API endpoint
+      const response = await fetch('/api/user/meal-history/delete-all', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete all meal history');
+      }
+      
+      // Clear the local state
+      setMealHistory([]);
+      
+      // Show success message
+      alert('All meal history entries have been deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting all meal history:', error);
+      alert('Failed to delete all meal history. Please try again.');
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
       return;
@@ -593,6 +630,13 @@ export default function MyMealHistoryPage() {
                   onChange={handleFileUpload}
                 />
               </label>
+              <button
+                onClick={handleDeleteAllMeals}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                title="Delete all meal history entries"
+              >
+                Delete All
+              </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-right">
               Upload screenshots of your UberEats order history to automatically extract and save your meal information

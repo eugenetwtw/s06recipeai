@@ -258,8 +258,17 @@ export async function DELETE(request: NextRequest) {
       // Continue even if metadata deletion fails
     }
 
-    // We don't delete the actual meal history entry, just the metadata
-    // This preserves the original data while allowing the user to hide it from their view
+    // Also delete the actual meal history entry
+    const { error: mealError } = await supabase
+      .from('meal_history')
+      .delete()
+      .eq('user_id', userId)
+      .eq('id', mealId);
+
+    if (mealError) {
+      console.error('Error deleting meal history:', mealError);
+      return NextResponse.json({ error: mealError.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       message: 'Meal history deleted successfully'

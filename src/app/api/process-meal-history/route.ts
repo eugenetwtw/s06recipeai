@@ -156,15 +156,45 @@ export async function POST(request: NextRequest) {
 
     const naturalLanguageSummary = summaryResponse.choices[0].message.content?.trim() || '';
 
-    // Save to Supabase - store the meal data and the summary
-    const { data, error } = await supabase
-      .from('meal_history')
-      .insert({
-        user_id: userId,
-        image_url: imageUrl || '',
-        detected_ingredients: mealData, // Using detected_ingredients as a temporary field for meal data
-        natural_language_summary: naturalLanguageSummary
-      });
+    // Check if we're updating an existing entry (based on image URL)
+    let existingEntry = null;
+    if (imageUrl) {
+      const { data: existingData } = await supabase
+        .from('meal_history')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('image_url', imageUrl)
+        .limit(1);
+      
+      if (existingData && existingData.length > 0) {
+        existingEntry = existingData[0];
+      }
+    }
+    
+    let result;
+    if (existingEntry) {
+      // Update existing entry
+      result = await supabase
+        .from('meal_history')
+        .update({
+          detected_ingredients: mealData,
+          natural_language_summary: naturalLanguageSummary
+        })
+        .eq('id', existingEntry.id)
+        .eq('user_id', userId);
+    } else {
+      // Insert new entry
+      result = await supabase
+        .from('meal_history')
+        .insert({
+          user_id: userId,
+          image_url: imageUrl || '',
+          detected_ingredients: mealData,
+          natural_language_summary: naturalLanguageSummary
+        });
+    }
+    
+    const { error } = result;
 
     if (error) {
       console.error('Error saving meal history:', error);

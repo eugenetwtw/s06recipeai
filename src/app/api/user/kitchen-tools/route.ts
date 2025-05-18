@@ -220,14 +220,54 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete the tool metadata
-    const { error } = await supabase
+    const { error: metadataError } = await supabase
       .from('user_kitchen_tool_metadata')
       .delete()
       .eq('user_id', userId)
       .eq('tool_name', toolName);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (metadataError) {
+      console.error('Error deleting kitchen tool metadata:', metadataError);
+      // Continue even if metadata deletion fails
+    }
+    
+    // Find and delete any kitchen tools entries with this tool name
+    // First, get all kitchen tools for this user
+    const { data: kitchenTools, error: fetchError } = await supabase
+      .from('kitchen_tools')
+      .select('*')
+      .eq('user_id', userId);
+      
+    if (fetchError) {
+      console.error('Error fetching kitchen tools:', fetchError);
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+    
+    // For each kitchen tool entry, check if it contains the tool to delete
+    for (const tool of kitchenTools || []) {
+      if (tool.detected_tools && 
+          tool.detected_tools.kitchenTools && 
+          Array.isArray(tool.detected_tools.kitchenTools) &&
+          tool.detected_tools.kitchenTools.includes(toolName)) {
+        
+        // Remove the tool from the kitchenTools array
+        const updatedTools = {
+          ...tool.detected_tools,
+          kitchenTools: tool.detected_tools.kitchenTools.filter((t: string) => t !== toolName)
+        };
+        
+        // Update the kitchen tool entry
+        const { error: updateError } = await supabase
+          .from('kitchen_tools')
+          .update({ detected_tools: updatedTools })
+          .eq('id', tool.id)
+          .eq('user_id', userId);
+          
+        if (updateError) {
+          console.error('Error updating kitchen tool:', updateError);
+          // Continue with other deletions even if this one fails
+        }
+      }
     }
 
     return NextResponse.json({

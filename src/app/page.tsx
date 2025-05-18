@@ -121,9 +121,18 @@ export default function Home() {
     await supabase.auth.signOut();
     setUser(null);
     
-    // Use window.location.href for a more direct redirect approach
-    // This should work more consistently in both local and deployed environments
-    window.location.href = '/sign-in';
+    // Clear any stored session data
+    localStorage.removeItem('supabase.auth.token');
+    sessionStorage.removeItem('supabase.auth.token');
+    
+    // For demo accounts, redirect to a special sign-out page to prevent immediate sign-in
+    if (isDemoAccount) {
+      // Add a timestamp parameter to prevent caching and force a fresh page load
+      window.location.href = `/sign-in?signout=true&t=${Date.now()}`;
+    } else {
+      // Regular accounts just go to sign-in
+      window.location.href = '/sign-in';
+    }
   };
 
   const handleFileUpload = async () => {
@@ -678,77 +687,34 @@ export default function Home() {
                   Manage Meals
                 </a>
               </div>
-              {/* Always show meal history data */}
-              <div>
-                {/* Mockup data - always shown for demo account */}
-                <>
-                  <div className="border-b pb-4 mb-4">
-                    <div className="flex items-center mb-2">
-                      <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                        Olive Garden
-                      </span>
-                      <span className="ml-2 text-gray-500 text-sm">
-                        Italian
-                      </span>
+              {mealHistoryData.length > 0 ? (
+                <div>
+                  {mealHistoryData.slice(0, 3).map((meal, index) => (
+                    <div key={index} className={`${index < mealHistoryData.length - 1 ? 'border-b' : ''} pb-4 mb-4 ${index === mealHistoryData.length - 1 ? 'pb-0 mb-0' : ''}`}>
+                      <div className="flex items-center mb-2">
+                        <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
+                          {meal.restaurant || 'Unknown Restaurant'}
+                        </span>
+                        <span className="ml-2 text-gray-500 text-sm">
+                          {meal.cuisine || 'Other'}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {meal.dishes && meal.dishes.map((dish: string, dishIndex: number) => (
+                          <span key={dishIndex} className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                            {dish}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Fettuccine Alfredo
-                      </span>
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Breadsticks
-                      </span>
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Tiramisu
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="border-b pb-4 mb-4">
-                    <div className="flex items-center mb-2">
-                      <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                        Sushi Palace
-                      </span>
-                      <span className="ml-2 text-gray-500 text-sm">
-                        Japanese
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        California Roll
-                      </span>
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Spicy Tuna Roll
-                      </span>
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Miso Soup
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="pb-4">
-                    <div className="flex items-center mb-2">
-                      <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
-                        Home Kitchen
-                      </span>
-                      <span className="ml-2 text-gray-500 text-sm">
-                        Mediterranean
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Greek Salad
-                      </span>
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Grilled Chicken
-                      </span>
-                      <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
-                        Hummus
-                      </span>
-                    </div>
-                  </div>
-                </>
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-600 mb-3">No meal history data uploaded yet.</p>
+                  <a href="/my-meal-history" className="bg-indigo-600 text-white rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">Add Meal History</a>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">

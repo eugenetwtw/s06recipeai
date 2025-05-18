@@ -323,6 +323,43 @@ export default function MyKitchenToolsPage() {
     }
   };
 
+  const handleDeleteAllTools = async () => {
+    // Confirm with the user before deleting all kitchen tools
+    if (!confirm('Are you sure you want to delete ALL kitchen tools? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+      
+      // Call the delete-all API endpoint
+      const response = await fetch('/api/user/kitchen-tools/delete-all', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete all kitchen tools');
+      }
+      
+      // Clear the local state
+      setKitchenTools([]);
+      
+      // Show success message
+      alert('All kitchen tools have been deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting all kitchen tools:', error);
+      alert('Failed to delete all kitchen tools. Please try again.');
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
       return;
@@ -466,6 +503,13 @@ export default function MyKitchenToolsPage() {
                   onChange={handleFileUpload}
                 />
               </label>
+              <button
+                onClick={handleDeleteAllTools}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+                title="Delete all kitchen tools"
+              >
+                Delete All
+              </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-right">
               Upload photos of your kitchen tools to automatically identify and add them to your inventory
