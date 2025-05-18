@@ -32,14 +32,16 @@ export async function POST(request: NextRequest) {
       ingredients, 
       refrigeratorContents, 
       cookingTools, 
-      dietaryPreferences 
+      dietaryPreferences,
+      prioritizeTool 
     } = await request.json();
 
     // Prepare context for recipe generation
     const context = JSON.stringify({
       refrigeratorContents,
       cookingTools,
-      dietaryPreferences
+      dietaryPreferences,
+      prioritizeTool
     });
 
     // Generate recipe using OpenAI

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { getSuggestedRecipesForTools } from '@/lib/tool-recipe-mapping';
 
 type DietaryPreferences = {
   vegetarian?: boolean;
@@ -20,10 +21,30 @@ export default function RecipeGeneratorPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
+  const [cookingTools, setCookingTools] = useState<string[]>([]);
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [suggestedRecipes, setSuggestedRecipes] = useState<string[]>([]);
 
   useEffect(() => {
     checkAuthStatus();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserKitchenTools();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    // Update suggested recipes based on selected tool or all tools
+    if (selectedTool) {
+      const suggestions = getSuggestedRecipesForTools([selectedTool]);
+      setSuggestedRecipes(suggestions);
+    } else if (cookingTools.length > 0) {
+      const suggestions = getSuggestedRecipesForTools(cookingTools);
+      setSuggestedRecipes(suggestions);
+    }
+  }, [cookingTools, selectedTool]);
 
   const checkAuthStatus = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -35,6 +56,29 @@ export default function RecipeGeneratorPage() {
       setUser(null);
       setSession(null);
       router.push('/login');
+    }
+  };
+
+  const fetchUserKitchenTools = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('kitchen_tools')
+        .select('detected_tools')
+        .eq('user_id', user.id);
+        
+      if (data && data.length > 0) {
+        // Extract tools from all records
+        const allTools = data.flatMap(record => 
+          record.detected_tools?.kitchenTools || []
+        );
+        // Remove duplicates
+        const uniqueTools = allTools.filter((tool, index) => 
+          allTools.indexOf(tool) === index
+        );
+        setCookingTools(uniqueTools);
+      }
+    } catch (error) {
+      console.error('Error fetching kitchen tools:', error);
     }
   };
 
@@ -80,6 +124,11 @@ export default function RecipeGeneratorPage() {
         throw new Error('Not authenticated');
       }
 
+      // Determine which cooking tools to include
+      const toolsToInclude = selectedTool 
+        ? [selectedTool] 
+        : cookingTools;
+
       const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: {
@@ -89,8 +138,9 @@ export default function RecipeGeneratorPage() {
         body: JSON.stringify({
           ingredients,
           refrigeratorContents: [],
-          cookingTools: [],
-          dietaryPreferences
+          cookingTools: toolsToInclude,
+          dietaryPreferences,
+          prioritizeTool: selectedTool
         })
       });
 
@@ -147,6 +197,54 @@ export default function RecipeGeneratorPage() {
         {/* Ingredients Input Section */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Add Ingredients</h2>
+          
+          {cookingTools.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Generate recipe for specific kitchen tool:
+              </label>
+              <select 
+                value={selectedTool || ''} 
+                onChange={(e) => setSelectedTool(e.target.value || null)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Any tool</option>
+                {cookingTools.map(tool => (
+                  <option key={tool} value={tool}>{tool}</option>
+                ))}
+              </select>
+              {selectedTool && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Recipe will be optimized for using: <span className="font-medium">{selectedTool}</span>
+                </p>
+              )}
+            </div>
+          )}
+          
+          {suggestedRecipes.length > 0 && (
+            <div className="mb-4 p-3 bg-indigo-50 rounded-lg">
+              <h3 className="text-md font-medium text-indigo-700 mb-2">
+                Suggested recipes based on your kitchen tools:
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {suggestedRecipes.slice(0, 12).map((recipe, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setNewIngredient(recipe);
+                      addIngredient();
+                    }}
+                    className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full hover:bg-indigo-200 text-sm"
+                  >
+                    {recipe}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-indigo-600 mt-2">
+                Click on a recipe to add it as an ingredient
+              </p>
+            </div>
+          )}
           
           <div className="flex mb-4">
             <input

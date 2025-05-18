@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!
@@ -19,7 +23,8 @@ export async function POST(request: NextRequest) {
       Text:
       ${text}
 
-      Respond with ONLY a JSON array of strings, for example: ["Spatula", "Whisk", "Saucepan"]
+      Respond with ONLY a JSON array of strings in the following format:
+      {"kitchenTools": ["Spatula", "Whisk", "Saucepan"]}
     `;
 
     const aiResponse = await openai.chat.completions.create({
@@ -28,7 +33,14 @@ export async function POST(request: NextRequest) {
       response_format: { type: 'json_object' }
     });
 
-    const toolsArray = aiResponse.choices[0].message.content as unknown as string[];
+    let toolsArray: any;
+    try {
+      const parsedResponse = JSON.parse(aiResponse.choices[0].message.content as string);
+      toolsArray = parsedResponse;
+    } catch (parseError) {
+      console.error('Error parsing kitchen tools JSON:', parseError);
+      return NextResponse.json({ error: 'Invalid JSON format from AI' }, { status: 500 });
+    }
     // Save into Supabase kitchen_tools table
     const { data, error } = await supabase
       .from('kitchen_tools')

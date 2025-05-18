@@ -65,6 +65,16 @@ export class OpenAIService {
 
   public static async generateRecipe(ingredients: string[], context: string) {
     const openai = this.getInstance();
+    
+    // Parse the context to extract kitchen tools
+    let contextObj;
+    try {
+      contextObj = JSON.parse(context);
+    } catch (error) {
+      contextObj = { cookingTools: [] };
+    }
+    
+    const cookingTools = contextObj.cookingTools || [];
 
     try {
       const response = await openai.chat.completions.create({
@@ -72,21 +82,30 @@ export class OpenAIService {
         messages: [
           {
             role: 'system',
-            content: 'You are a professional chef specializing in creating personalized recipes based on available ingredients.'
+            content: 'You are a professional chef specializing in creating personalized recipes based on available ingredients and kitchen tools.'
           },
           {
             role: 'user',
             content: `Generate a creative recipe using these ingredients: ${ingredients.join(', ')}. 
+                      
+                      Available kitchen tools: ${cookingTools.length > 0 ? cookingTools.join(', ') : 'Basic kitchen tools only'}.
+                      
+                      IMPORTANT: Only suggest cooking methods that can be done with the available tools.
+                      For example, if an oven is available, you can suggest baking a pizza. If no oven
+                      is available, avoid recipes that require baking.
+                      
                       Additional context: ${context}. 
+                      
                       Please provide:
                       - Recipe name
                       - Ingredients list
-                      - Step-by-step instructions
+                      - Step-by-step instructions (using only available tools)
                       - Estimated cooking time
-                      - Difficulty level`
+                      - Difficulty level
+                      - Explanation of how this recipe is suitable for the available kitchen tools`
           }
         ],
-        max_tokens: 500,
+        max_tokens: 800,
         temperature: 0.7
       });
 

@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function Home() {
+  const router = useRouter();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   type UploadType = 'refrigerator' | 'kitchen_tools' | 'meal_history';
   const [uploadType, setUploadType] = useState<UploadType>('refrigerator');
   const [user, setUser] = useState<any>(null);
+
+  
   const [mealHistoryText, setMealHistoryText] = useState<string>('');
   const [processingText, setProcessingText] = useState<boolean>(false);
   const [processingSeconds, setProcessingSeconds] = useState<number>(0);
@@ -211,6 +216,7 @@ export default function Home() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleFileUpload = async () => {
+    if (!user) { router.push('/sign-in'); return; }
     if (!selectedFiles.length) {
       setUploadError('Please select at least one file');
       return;
@@ -301,7 +307,8 @@ export default function Home() {
   };
 
   const handleProcessKitchenTools = async () => {
-    if (!kitchenToolsText.trim() || !user) return;
+    if (!user) { router.push('/sign-in'); return; }
+    if (!kitchenToolsText.trim()) return;
     setProcessingKitchenToolsText(true);
     try {
       const response = await fetch('/api/process-kitchen-tools', {
