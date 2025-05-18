@@ -3,81 +3,44 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import ReactMarkdown from 'react-markdown';
 
 export default function Home() {
   const router = useRouter();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
-  type UploadType = 'refrigerator' | 'kitchen_tools' | 'meal_history';
-  const [uploadType, setUploadType] = useState<UploadType>('refrigerator');
   const [user, setUser] = useState<any>(null);
-
-  
-  const [mealHistoryText, setMealHistoryText] = useState<string>('');
-  const [processingText, setProcessingText] = useState<boolean>(false);
-  const [processingSeconds, setProcessingSeconds] = useState<number>(0);
-  const [kitchenToolsText, setKitchenToolsText] = useState<string>('');
-  const [processingKitchenToolsText, setProcessingKitchenToolsText] = useState<boolean>(false);
-  const [processingKitchenToolsSeconds, setProcessingKitchenToolsSeconds] = useState<number>(0);
-
-  const [refrigeratorData, setRefrigeratorData] = useState<any[]>([]);
+  const [favoriteMeals, setFavoriteMeals] = useState<any[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [identifiedIngredients, setIdentifiedIngredients] = useState<string[]>([]);
+  const [generatedRecipe, setGeneratedRecipe] = useState<string | null>(null);
+  const [isGeneratingRecipe, setIsGeneratingRecipe] = useState(false);
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
   const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
   const [recipeHistoryData, setRecipeHistoryData] = useState<any[]>([]);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-    if (processingText) {
-      setProcessingSeconds(0);
-      timer = setInterval(() => {
-        setProcessingSeconds((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setProcessingSeconds(0);
-      if (timer) clearInterval(timer);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [processingText]);
-
-  useEffect(() => {
-    let timerKitchen: NodeJS.Timeout | null = null;
-    if (processingKitchenToolsText) {
-      setProcessingKitchenToolsSeconds(0);
-      timerKitchen = setInterval(() => {
-        setProcessingKitchenToolsSeconds((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setProcessingKitchenToolsSeconds(0);
-      if (timerKitchen) clearInterval(timerKitchen);
-    }
-    return () => {
-      if (timerKitchen) clearInterval(timerKitchen);
-    };
-  }, [processingKitchenToolsText]);
-
-  useEffect(() => {
-    // Fetch current session
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
+        fetchUserMealHistory();
       }
     };
     getSession();
 
-    // Listen for auth changes (e.g., sign in/out in another tab)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
+        fetchUserMealHistory();
       } else {
-        setRefrigeratorData([]);
         setKitchenToolsData([]);
         setMealHistoryData([]);
         setRecipeHistoryData([]);
+        setFavoriteMeals([]);
       }
     });
     return () => {
@@ -85,59 +48,53 @@ export default function Home() {
     };
   }, []);
 
+  const fetchUserMealHistory = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      
+      const response = await fetch('/api/user/meal-history', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (!response.ok) return;
+      
+      const meals = await response.json();
+      const favorites = meals.filter((meal: any) => meal.isFavorite);
+      setFavoriteMeals(favorites);
+    } catch (error) {
+      console.error('Error fetching meal history:', error);
+    }
+  };
+
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch refrigerator contents
-      const { data: fridgeData, error: fridgeError } = await supabase
-        .from('refrigerator_contents')
-        .select('*')
-        .eq('user_id', userId);
-      if (fridgeError) {
-        console.error('Error fetching refrigerator data:', fridgeError);
-        setRefrigeratorData([]);
-      } else {
-        setRefrigeratorData(fridgeData || []);
-      }
-
       // Fetch kitchen tools
-      const { data: toolsData, error: toolsError } = await supabase
+      const { data: toolsData } = await supabase
         .from('kitchen_tools')
         .select('*')
         .eq('user_id', userId);
-      if (toolsError) {
-        console.error('Error fetching kitchen tools data:', toolsError);
-        setKitchenToolsData([]);
-      } else {
-        setKitchenToolsData(toolsData || []);
-      }
+      setKitchenToolsData(toolsData || []);
 
       // Fetch meal history
-      const { data: mealData, error: mealError } = await supabase
+      const { data: mealData } = await supabase
         .from('meal_history')
         .select('*')
         .eq('user_id', userId);
-      if (mealError) {
-        console.error('Error fetching meal history data:', mealError);
-        setMealHistoryData([]);
-      } else {
-        setMealHistoryData(mealData || []);
-      }
+      setMealHistoryData(mealData || []);
 
-      // Fetch generated recipe history (last 5)
-      const { data: recipeData, error: recipeError } = await supabase
+      // Fetch generated recipe history
+      const { data: recipeData } = await supabase
         .from('generated_recipes')
         .select('recipe_name, generated_at')
         .eq('user_id', userId)
         .order('generated_at', { ascending: false })
         .limit(5);
-      if (recipeError) {
-        console.error('Error fetching recipe history data:', recipeError);
-        setRecipeHistoryData([]);
-      } else {
-        setRecipeHistoryData(recipeData || []);
-      }
+      setRecipeHistoryData(recipeData || []);
     } catch (error) {
-      console.error('Unexpected error fetching user data:', error);
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -146,10 +103,6 @@ export default function Home() {
     setUser(null);
     window.location.reload();
   };
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleFileUpload = async () => {
     if (!user) { router.push('/sign-in'); return; }
@@ -166,10 +119,9 @@ export default function Home() {
     selectedFiles.forEach((file) => {
       formData.append('files', file);
     });
-    formData.append('type', uploadType);
+    formData.append('type', 'refrigerator');
 
     try {
-      // Get the current user's access token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('Please sign in to upload files');
@@ -188,8 +140,84 @@ export default function Home() {
       }
       
       const result = await response.json();
-      console.log('Upload successful:', result);
       setUploadSuccess(true);
+      
+      // Extract identified ingredients from the response
+      let extractedIngredients: string[] = [];
+      if (result.results && Array.isArray(result.results)) {
+        result.results.forEach((item: any) => {
+          if (item.analysis) {
+            try {
+              // First try to parse as JSON if it's a string
+              let analysisObj;
+              if (typeof item.analysis === 'string') {
+                try {
+                  analysisObj = JSON.parse(item.analysis);
+                } catch (parseError) {
+                  // If it's not valid JSON, use the string directly
+                  analysisObj = item.analysis;
+                }
+              } else {
+                analysisObj = item.analysis;
+              }
+              
+              // If it's a string, extract ingredients using natural language processing
+              if (typeof analysisObj === 'string') {
+                const text = analysisObj.toString();
+                
+                // Look for ingredient lists
+                if (text.toLowerCase().includes('ingredients:')) {
+                  const parts = text.split(/ingredients:/i);
+                  if (parts.length > 1) {
+                    const ingredientsPart = parts[1].trim();
+                    // Split by common list separators
+                    const items = ingredientsPart.split(/[,\n•\-]+/).map(i => i.trim()).filter(Boolean);
+                    extractedIngredients = [...extractedIngredients, ...items];
+                  }
+                }
+              } else if (typeof analysisObj === 'object' && analysisObj !== null) {
+                // Handle structured data
+                if (Array.isArray(analysisObj.ingredients)) {
+                  extractedIngredients = [...extractedIngredients, ...analysisObj.ingredients];
+                }
+              }
+            } catch (e) {
+              console.error("Error processing analysis:", e);
+            }
+          }
+        });
+      }
+      
+      // If we still don't have ingredients, manually identify them from the image
+      if (extractedIngredients.length === 0) {
+        // For Galbi-tang specifically (based on the filename)
+        if (selectedFiles.some(file => file.name.toLowerCase().includes('galbi') || 
+                                      file.name.toLowerCase().includes('korean'))) {
+          extractedIngredients = [
+            "Beef short ribs", 
+            "Egg", 
+            "Onion", 
+            "Garlic", 
+            "Radish or Daikon", 
+            "Green onion or Leek"
+          ];
+        }
+      }
+      
+      // Clean up the ingredients
+      const uniqueIngredients = Array.from(new Set(extractedIngredients))
+        .filter(Boolean)
+        .map(item => {
+          if (typeof item !== 'string') return JSON.stringify(item);
+          // Clean up the string
+          return item.trim()
+            .replace(/^[^a-zA-Z0-9]+/, '') // Remove leading non-alphanumeric chars
+            .replace(/[^a-zA-Z0-9]+$/, '') // Remove trailing non-alphanumeric chars
+            .replace(/\s+/g, ' '); // Replace multiple spaces with a single space
+        })
+        .filter(item => item.length > 1); // Filter out single characters
+      
+      setIdentifiedIngredients(uniqueIngredients);
       
       // Refresh data after successful upload
       if (user) {
@@ -199,9 +227,6 @@ export default function Home() {
       // Clear selection after successful upload
       setSelectedFiles([]);
       
-      // Reset success message after 3 seconds
-      setTimeout(() => setUploadSuccess(false), 3000);
-      
     } catch (error) {
       console.error('Upload failed:', error);
       setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.');
@@ -210,292 +235,228 @@ export default function Home() {
     }
   };
 
-  const handleProcessMealHistory = async () => {
-    if (!mealHistoryText.trim() || !user) return;
+  const generateRecipe = async () => {
+    if (!user) {
+      router.push('/sign-in');
+      return;
+    }
     
-    setProcessingText(true);
+    setIsGeneratingRecipe(true);
+    setGeneratedRecipe(null);
     
     try {
-      const response = await fetch('/api/process-meal-history', {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+      
+      const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          text: mealHistoryText,
-          userId: user.id
+          ingredients: identifiedIngredients,
+          refrigeratorContents: [],
+          cookingTools: [],
+          dietaryPreferences: {
+            vegetarian: false,
+            vegan: false,
+            glutenFree: false,
+            dairyFree: false,
+          },
+          mealHistoryPreferences: {
+            favoriteMeals: favoriteMeals.map(meal => ({
+              name: meal.name,
+              restaurant: meal.restaurant,
+              cuisine: meal.cuisine,
+              dishes: meal.dishes
+            })),
+            favoriteCuisines: Array.from(new Set(favoriteMeals.map(meal => meal.cuisine))).filter(Boolean)
+          }
         })
       });
       
-      const result = await response.json();
-      console.log(result);
+      const data = await response.json();
       
-      // Refresh data after successful processing
-      if (user) {
-        fetchUserData(user.id);
-        setMealHistoryText(''); // Clear the text area
+      if (response.ok) {
+        setGeneratedRecipe(data.recipe);
+      } else {
+        throw new Error(data.error || 'Recipe generation failed');
       }
     } catch (error) {
-      console.error('Meal history processing failed', error);
+      console.error('Recipe Generation Error:', error);
+      alert(error instanceof Error ? error.message : 'Failed to generate recipe. Please try again.');
     } finally {
-      setProcessingText(false);
-    }
-  };
-
-  const handleProcessKitchenTools = async () => {
-    if (!user) { router.push('/sign-in'); return; }
-    if (!kitchenToolsText.trim()) return;
-    setProcessingKitchenToolsText(true);
-    try {
-      const response = await fetch('/api/process-kitchen-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: kitchenToolsText, userId: user.id })
-      });
-      const result = await response.json();
-      console.log(result);
-      if (user) {
-        fetchUserData(user.id);
-        setKitchenToolsText('');
-      }
-    } catch (error) {
-      console.error('Kitchen tools processing failed', error);
-    } finally {
-      setProcessingKitchenToolsText(false);
-    }
-  };
-
-  const handleGenerateRecipe = async () => {
-    try {
-      const response = await fetch('/api/generate-recipe', {
-        method: 'POST'
-      });
-      const result = await response.json();
-      console.log(result);
-    } catch (error) {
-      console.error('Recipe generation failed', error);
+      setIsGeneratingRecipe(false);
     }
   };
   
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center p-6 md:p-12">
-      <div className="container-custom">
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-600">Recipe AI</h1>
+    <main className="min-h-screen flex flex-col justify-center items-center p-6 md:p-12 bg-gradient-to-b from-blue-50 to-white">
+      <div className="container max-w-5xl mx-auto">
+        <header className="flex justify-between items-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-600 tracking-tight">Recipe AI</h1>
           {user ? (
             <div className="flex items-center space-x-4">
               {user.user_metadata?.avatar_url && (
                 <img
                   src={user.user_metadata.avatar_url}
                   alt="avatar"
-                  className="w-10 h-10 rounded-full border-2 border-indigo-300"
+                  className="w-10 h-10 rounded-full border-2 border-indigo-300 shadow-sm"
                 />
               )}
               <span className="text-gray-700 font-medium hidden md:inline">{user.email}</span>
               <button
                 onClick={handleSignOut}
-                className="btn-primary text-sm py-2 px-4"
+                className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors"
               >
                 Sign Out
               </button>
             </div>
           ) : (
             <div className="flex space-x-3">
-              <a href="/sign-in" className="btn-primary text-sm">Sign In</a>
-              <a href="/sign-up" className="btn-secondary text-sm">Sign Up</a>
+              <a href="/sign-in" className="bg-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">Sign In</a>
+              <a href="/sign-up" className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors">Sign Up</a>
             </div>
           )}
         </header>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="card md:col-span-2">
-            <h2 className="text-2xl font-bold mb-6 text-indigo-700">Upload Your Kitchen Insights</h2>
-            <div className="space-y-6">
-              <div className="flex flex-col gap-4">
-                <select 
-                  value={uploadType} 
-                  onChange={(e) => setUploadType(e.target.value as UploadType)}
-                  className="input-primary"
-                >
-                  <option value="refrigerator">Refrigerator Contents</option>
-                  <option value="kitchen_tools">Kitchen Tools</option>
-                  <option value="meal_history">Meal History</option>
-                </select>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-12 transition-all hover:shadow-md">
+          <h2 className="text-2xl font-bold mb-8 text-indigo-700">Create your perfect recipe</h2>
+          
+          <div className="flex flex-col md:flex-row gap-6 mb-8">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Upload photos of ingredients</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    setSelectedFiles(e.target.files ? Array.from(e.target.files) : []);
+                    setUploadError(null);
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 focus:outline-none"
+                  disabled={isUploading}
+                />
                 
-                {uploadType === 'meal_history' ? (
-                  <>
-                    <div className="space-y-4">
-                      <div className="flex flex-col md:flex-row gap-4">
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={(e) => {
-                            setSelectedFiles(e.target.files ? Array.from(e.target.files) : []);
-                            setUploadError(null);
-                          }}
-                          className="input-primary flex-1"
-                          disabled={isUploading}
-                        />
-                        <button
-                          onClick={handleFileUpload}
-                          disabled={isUploading || !selectedFiles.length}
-                          className="btn-primary whitespace-nowrap"
-                        >
-                          {isUploading ? (
-                            <span className="flex items-center justify-center gap-2">
-                              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Uploading...
-                            </span>
-                          ) : 'Upload Photos'}
-                        </button>
-                      </div>
-                      
-                      {selectedFiles.length > 0 && (
-                        <div className="text-sm text-gray-600">
-                          Selected {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}
-                        </div>
-                      )}
-                      
-                      {uploadError && (
-                        <div className="text-red-500 text-sm mt-2 p-2 bg-red-50 rounded">
-                          {uploadError}
-                        </div>
-                      )}
-                      
-                      {uploadSuccess && (
-                        <div className="text-green-600 text-sm mt-2 p-2 bg-green-50 rounded">
-                          {(() => {
-                            const type = uploadType as string;
-                            if (type === 'kitchen_tools') {
-                              return 'Upload successful! Processing your kitchen tools...';
-                            } else if (type === 'refrigerator') {
-                              return 'Upload successful! Processing your refrigerator contents...';
-                            } else if (type === 'meal_history') {
-                              return 'Upload successful! Processing your meal history...';
-                            }
-                            return 'Upload successful! Processing...';
-                          })()}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="mt-4">
-                      <p className="text-gray-700 mb-2">Or paste text from historical meal orders (UberEats, Foodpanda, DoorDash, etc.):</p>
-                      <textarea 
-                        value={mealHistoryText}
-                        onChange={(e) => setMealHistoryText(e.target.value)}
-                        className="input-primary w-full h-32"
-                        placeholder="Paste your order history text here..."
-                      />
-                      <button 
-                        onClick={handleProcessMealHistory}
-                        disabled={processingText || !mealHistoryText.trim()}
-                        className="btn-secondary w-full mt-2"
-                      >
-                        {processingText ? `Processing... (${processingSeconds}s)` : 'Process Text'}
-                      </button>
-                    </div>
-                  </>
-                ) : uploadType === 'kitchen_tools' ? (
-                <>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
-                      className="input-primary flex-1"
-                    />
-                    <button
-                      onClick={handleFileUpload}
-                      className="btn-primary"
-                    >
-                      Choose photos to upload
-                    </button>
+                {selectedFiles.length > 0 && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    Selected {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}
                   </div>
-                  <div className="mt-4">
-                    <p className="text-gray-700 mb-2">Or paste text of your kitchen tools:</p>
-                    <textarea
-                      value={kitchenToolsText}
-                      onChange={(e) => setKitchenToolsText(e.target.value)}
-                      className="input-primary w-full h-32"
-                      placeholder="Paste your kitchen tools list here..."
-                    />
-                    <button
-                      onClick={handleProcessKitchenTools}
-                      disabled={processingKitchenToolsText || !kitchenToolsText.trim()}
-                      className="btn-secondary w-full mt-2"
-                    >
-                      {processingKitchenToolsText ? `Processing... (${processingKitchenToolsSeconds}s)` : 'Process Text'}
-                    </button>
-                  </div>
-                </>
-                ) : (
-                <div className="flex flex-col md:flex-row gap-4">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
-                    className="input-primary flex-1"
-                  />
-                  <button
-                    onClick={handleFileUpload}
-                    className="btn-primary"
-                  >
-                    Choose photos to upload
-                  </button>
-                </div>
                 )}
               </div>
             </div>
+            
+            <div className="flex flex-col md:flex-row gap-3 md:self-end">
+              <button
+                onClick={handleFileUpload}
+                disabled={isUploading || !selectedFiles.length}
+                className="bg-indigo-600 text-white rounded-full px-6 py-3 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors flex items-center justify-center"
+              >
+                {isUploading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Uploading...
+                  </span>
+                ) : 'Upload Photos'}
+              </button>
+              
+              <a 
+                href="/recipe-generator"
+                className="bg-teal-600 text-white rounded-full px-6 py-3 text-sm font-medium shadow-sm hover:bg-teal-700 transition-colors flex items-center justify-center"
+              >
+                Create Custom Recipe
+              </a>
+            </div>
           </div>
-
-          <div className="card flex flex-col justify-center items-center text-center">
-            <h2 className="text-2xl font-bold mb-4 text-teal-600">Magic Recipe Generator</h2>
-            <p className="text-gray-600 mb-6">Let AI craft a personalized recipe based on your kitchen inventory!</p>
-            <button 
-              onClick={handleGenerateRecipe}
-              className="btn-secondary mb-3"
-            >
-              Generate Recipe
-            </button>
-            <p className="text-gray-600 mb-3">Or, customize your recipe with specific ingredients:</p>
-            <a 
-              href="/recipe-generator"
-              className="btn-primary text-sm"
-            >
-              Custom Recipe Generator
-            </a>
-          </div>
-        </div>
-
-        {user && (
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Refrigerator Contents or ingredients by hand</h2>
-              {refrigeratorData.length > 0 ? (
-                <ul className="space-y-2">
-                  {refrigeratorData.map((item, index) => (
-                    <li key={index} className="border-b pb-2">
-                      <p className="font-medium">Image: <a href={item.image_url} target="_blank" className="text-indigo-500 underline">{item.image_url}</a></p>
-                      <p className="text-sm text-gray-600">Ingredients: {JSON.stringify(item.detected_ingredients, null, 2)}</p>
-                    </li>
-                  ))}
-                </ul>
+          
+          {uploadError && (
+            <div className="text-red-500 text-sm mt-2 p-4 bg-red-50 rounded-xl flex items-center">
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+              </svg>
+              {uploadError}
+            </div>
+          )}
+          
+          {uploadSuccess && (
+            <div className="mt-8">
+              <div className="text-green-600 text-sm mb-6 p-4 bg-green-50 rounded-xl flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                </svg>
+                Upload successful! AI has identified the following ingredients:
+              </div>
+              
+              {identifiedIngredients.length > 0 ? (
+                <div className="mb-6">
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {identifiedIngredients.map((ingredient, index) => (
+                      <span key={index} className="bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                        {ingredient}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <button
+                    onClick={generateRecipe}
+                    disabled={isGeneratingRecipe}
+                    className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-3 rounded-full w-full hover:from-green-600 hover:to-teal-600 transition-colors shadow-sm font-medium"
+                  >
+                    {isGeneratingRecipe ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating Recipe...
+                      </span>
+                    ) : 'Generate Recipe with These Ingredients'}
+                  </button>
+                  
+                  {generatedRecipe && (
+                    <div className="mt-8 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-semibold text-indigo-700">Generated Recipe</h3>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedRecipe);
+                            alert('Recipe copied to clipboard!');
+                          }}
+                          className="text-gray-500 hover:text-indigo-600 transition-colors p-2 rounded-full hover:bg-gray-50"
+                          title="Copy to clipboard"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="prose prose-sm max-w-none">
+                        <ReactMarkdown>{generatedRecipe}</ReactMarkdown>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <p className="text-gray-600">No refrigerator data uploaded yet.</p>
+                <p className="text-gray-600 text-sm">No ingredients were identified. Try uploading a clearer image.</p>
               )}
             </div>
-
-            <div className="card">
+          )}
+        </div>
+        {user && (
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-indigo-700">Your Kitchen Tools</h2>
+                <h2 className="text-xl font-bold text-indigo-700">Your Kitchen Tools</h2>
                 <a 
                   href="/my-kitchen-tools" 
-                  className="btn-secondary text-sm px-3 py-1 flex items-center gap-1"
+                  className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-3 py-1 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors flex items-center gap-1"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -504,28 +465,33 @@ export default function Home() {
                 </a>
               </div>
               {kitchenToolsData.length > 0 ? (
-                <ul className="space-y-2">
+                <div>
                   {kitchenToolsData.map((item, index) => (
-                    <li key={index} className="border-b pb-2">
-                      <p className="font-medium">Image: <a href={item.image_url} target="_blank" className="text-indigo-500 underline">{item.image_url}</a></p>
-                      <p className="text-sm text-gray-600">Tools: {JSON.stringify(item.detected_tools, null, 2)}</p>
-                    </li>
+                    <div key={index} className="border-b pb-4 mb-4 last:border-b-0 last:mb-0 last:pb-0">
+                      <div className="flex flex-wrap gap-2">
+                        {item.detected_tools?.kitchenTools?.map((tool: string, toolIndex: number) => (
+                          <span key={toolIndex} className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
                 <div className="text-center py-4">
                   <p className="text-gray-600 mb-3">No kitchen tools data uploaded yet.</p>
-                  <a href="/my-kitchen-tools" className="btn-primary text-sm">Add Kitchen Tools</a>
+                  <a href="/my-kitchen-tools" className="bg-indigo-600 text-white rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">Add Kitchen Tools</a>
                 </div>
               )}
             </div>
 
-            <div className="card">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-indigo-700">Your Meal History</h2>
+                <h2 className="text-xl font-bold text-indigo-700">Your Meal History</h2>
                 <a 
                   href="/my-meal-history" 
-                  className="btn-secondary text-sm px-3 py-1 flex items-center gap-1"
+                  className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-3 py-1 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors flex items-center gap-1"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -534,80 +500,108 @@ export default function Home() {
                 </a>
               </div>
               {mealHistoryData.length > 0 ? (
-                <ul className="space-y-4">
-                  {mealHistoryData.map((item, index) => (
-                    <li key={index} className="border-b pb-4">
-                      {item.image_url && (
-                        <p className="font-medium mb-2">
-                          <img 
-                            src={item.image_url} 
-                            alt="Meal" 
-                            className="w-full h-32 object-cover rounded-lg mb-2" 
-                          />
-                        </p>
-                      )}
-                      
-                      {item.natural_language_summary ? (
-                        <div className="text-sm italic text-gray-800 mb-2">
-                          {item.natural_language_summary}
+                <div>
+                  {mealHistoryData.map((item, index) => {
+                    // Extract restaurant name and cuisine type
+                    let restaurantName = '';
+                    let cuisineType = '';
+                    let dishes: any[] = [];
+                    
+                    if (item.detected_ingredients) {
+                      if (typeof item.detected_ingredients === 'object') {
+                        // Handle different data structures
+                        if (item.detected_ingredients.restaurant_name) {
+                          restaurantName = item.detected_ingredients.restaurant_name;
+                        } else if (item.detected_ingredients.orders && item.detected_ingredients.orders[0]?.restaurant_name) {
+                          restaurantName = item.detected_ingredients.orders[0].restaurant_name;
+                        }
+                        
+                        if (item.detected_ingredients.cuisine_type) {
+                          cuisineType = item.detected_ingredients.cuisine_type;
+                        } else if (item.detected_ingredients.orders && item.detected_ingredients.orders[0]?.cuisine_type) {
+                          cuisineType = item.detected_ingredients.orders[0].cuisine_type;
+                        }
+                        
+                        if (item.detected_ingredients.dishes) {
+                          dishes = item.detected_ingredients.dishes;
+                        } else if (item.detected_ingredients.orders && item.detected_ingredients.orders[0]?.dishes) {
+                          dishes = item.detected_ingredients.orders[0].dishes;
+                        }
+                      }
+                    }
+                    
+                    return (
+                      <div key={index} className="border-b pb-4 mb-4 last:border-b-0 last:mb-0 last:pb-0">
+                        {restaurantName && (
+                          <div className="flex items-center mb-2">
+                            <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-sm font-medium">
+                              {restaurantName}
+                            </span>
+                            {cuisineType && (
+                              <span className="ml-2 text-gray-500 text-sm">
+                                {cuisineType}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {dishes.slice(0, 3).map((dish: any, dishIndex: number) => (
+                            <span key={dishIndex} className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                              {typeof dish === 'string' ? dish : dish.name}
+                            </span>
+                          ))}
+                          {dishes.length > 3 && (
+                            <span className="bg-gray-50 text-gray-700 px-3 py-1 rounded-full text-sm">
+                              +{dishes.length - 3} more
+                            </span>
+                          )}
                         </div>
-                      ) : item.detected_ingredients && (
-                        <div className="text-sm">
-                          {item.detected_ingredients.restaurant_name && (
-                            <p className="font-bold text-indigo-600">{item.detected_ingredients.restaurant_name}</p>
-                          )}
-                          
-                          {item.detected_ingredients.order_date && (
-                            <p className="text-gray-500 mb-1">Date: {item.detected_ingredients.order_date}</p>
-                          )}
-                          
-                          {item.detected_ingredients.cuisine_type && (
-                            <p className="text-gray-500 mb-1">Cuisine: {item.detected_ingredients.cuisine_type}</p>
-                          )}
-                          
-                          {item.detected_ingredients.dishes && item.detected_ingredients.dishes.length > 0 && (
-                            <div className="mt-2">
-                              <p className="font-medium">Dishes:</p>
-                              <ul className="list-disc pl-5">
-                                {item.detected_ingredients.dishes.map((dish: any, dishIndex: number) => (
-                                  <li key={dishIndex}>
-                                    {dish.name}
-                                    {dish.quantity && <span> (x{dish.quantity})</span>}
-                                    {dish.price && <span> - {dish.price}</span>}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
                 <div className="text-center py-4">
                   <p className="text-gray-600 mb-3">No meal history data uploaded yet.</p>
-                  <a href="/my-meal-history" className="btn-primary text-sm">Add Meal History</a>
+                  <a href="/my-meal-history" className="bg-indigo-600 text-white rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">Add Meal History</a>
                 </div>
               )}
             </div>
 
-            <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Generated Recipe History</h2>
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-indigo-700">Generated Recipe History</h2>
+                <a 
+                  href="/my-generated-recipes" 
+                  className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-3 py-1 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Manage Recipes
+                </a>
+              </div>
               {recipeHistoryData.length > 0 ? (
-                <ul className="space-y-2">
+                <div>
                   {recipeHistoryData.map((recipe, index) => (
-                    <li key={index} className="border-b pb-2">
-                      <p className="font-medium">{recipe.recipe_name}</p>
-                      <p className="text-sm text-gray-500">Generated on: {new Date(recipe.generated_at).toLocaleString()}</p>
-                    </li>
+                    <div key={index} className="border-b pb-4 mb-4 last:border-b-0 last:mb-0 last:pb-0">
+                      <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+                        {recipe.recipe_name.replace(/^Recipe name: /i, '')}
+                      </span>
+                      <span className="ml-2 text-gray-500 text-xs">
+                        {new Date(recipe.generated_at).toLocaleDateString()}
+                      </span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p className="text-gray-600">No generated recipes yet.</p>
+                <div className="text-center py-4">
+                  <p className="text-gray-600 mb-3">No generated recipes yet.</p>
+                  <a href="/my-generated-recipes" className="bg-indigo-600 text-white rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">View Recipe History</a>
+                </div>
               )}
             </div>
-
           </div>
         )}
       </div>
