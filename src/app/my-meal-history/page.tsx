@@ -9,7 +9,7 @@ interface MealHistoryItem {
   name: string;
   restaurant: string;
   date: string;
-  cuisine: string;
+  cuisine: string | { name: string } | any; // Allow for cuisine to be a string or an object with a name property
   dishes: string[];
   notes?: string;
   isFavorite: boolean;
@@ -371,6 +371,20 @@ export default function MyMealHistoryPage() {
     }
   };
 
+  // Helper function to get cuisine string value
+  const getCuisineString = (cuisine: any): string => {
+    if (typeof cuisine === 'string') {
+      return cuisine;
+    } else if (typeof cuisine === 'object' && cuisine !== null) {
+      if ('name' in cuisine) {
+        return cuisine.name;
+      } else if ('id' in cuisine) {
+        return cuisine.id;
+      }
+    }
+    return 'other';
+  };
+
   // Filter meals based on search term and cuisine
   const filteredMeals = mealHistory.filter(meal => {
     const matchesSearch = 
@@ -378,7 +392,8 @@ export default function MyMealHistoryPage() {
       meal.restaurant.toLowerCase().includes(searchTerm.toLowerCase()) ||
       meal.dishes.some(dish => dish.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesCuisine = selectedCuisine === 'all' || meal.cuisine === selectedCuisine;
+    const cuisineStr = getCuisineString(meal.cuisine);
+    const matchesCuisine = selectedCuisine === 'all' || cuisineStr === selectedCuisine;
     
     return matchesSearch && matchesCuisine;
   });
@@ -483,7 +498,11 @@ export default function MyMealHistoryPage() {
                 <div className="mt-2 text-sm text-gray-600">
                   <p>Restaurant: <span className="font-medium">{meal.restaurant}</span></p>
                   <p>Date: <span className="font-medium">{new Date(meal.date).toLocaleDateString()}</span></p>
-                  <p>Cuisine: <span className="font-medium">{cuisines.find(c => c.id === meal.cuisine)?.name || meal.cuisine}</span></p>
+                  <p>Cuisine: <span className="font-medium">
+                    {cuisines.find(c => c.id === meal.cuisine)?.name || 
+                     (typeof meal.cuisine === 'object' && meal.cuisine && 'name' in meal.cuisine ? meal.cuisine.name : null) || 
+                     (typeof meal.cuisine === 'string' ? meal.cuisine : 'Other')}
+                  </span></p>
                   
                   {meal.dishes && meal.dishes.length > 0 && (
                     <div className="mt-2">
@@ -571,7 +590,9 @@ export default function MyMealHistoryPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Cuisine</label>
                 <select
-                  value={editingMeal.cuisine}
+                  value={typeof editingMeal.cuisine === 'string' ? editingMeal.cuisine : 
+                         typeof editingMeal.cuisine === 'object' && editingMeal.cuisine && 'id' in editingMeal.cuisine ? 
+                         editingMeal.cuisine.id : 'other'}
                   onChange={(e) => setEditingMeal({...editingMeal, cuisine: e.target.value})}
                   className="w-full p-2 border rounded"
                 >

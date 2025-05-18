@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -56,19 +56,40 @@ export default function SignInPage() {
       <div className="bg-white p-8 shadow-lg rounded-xl max-w-md w-full">
         <h1 className="text-3xl font-bold mb-6 text-indigo-600 text-center">Sign In to Recipe AI</h1>
         
-        <button
-          onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="bg-white border border-gray-300 text-gray-800 px-4 py-3 rounded-lg w-full mb-4 flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors duration-200"
-        >
-          <svg className="mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24h21.351c.732 0 1.325-.593 1.325-1.325V1.325C24 .593 23.407 0 22.675 0zM7.138 20.452c-2.138-1.444-3.593-4.05-3.593-6.861 0-.715.086-1.409.249-2.067L.222 9.307C-.254 10.363-.503 11.513-.503 12.713c0 5.273 3.359 9.753 8.08 11.272-1.879-1.138-3.278-3.087-3.439-5.533" fill="#4285F4"/>
-            <path d="M23.78 9.307c-.476-1.056-.725-2.206-.725-3.406 0-1.199.249-2.35.725-3.406l-3.572-2.217c-1.663 2.637-4.269 4.541-7.319 5.187 1.879 1.138 3.278 3.087 3.439 5.533-2.138-1.444-3.593-4.05-3.593-6.861 0-.715.086-1.409.249-2.067L.222 9.307C-.254 10.363-.503 11.513-.503 12.713c0 5.273 3.359 9.753 8.08 11.272L11.15 21.77c-2.14-2.01-3.491-5.012-3.491-8.284 0-3.272 1.351-6.274 3.491-8.284l3.572-2.217c-2.14-2.011-5.142-3.362-8.414-3.362-6.549 0-12.103 5.451-12.103 12.103s5.554 12.103 12.103 12.103c6.548 0 12.102-5.451 12.102-12.103 0-.598-.045-1.185-.122-1.759H23.78z" fill="#34A853"/>
-            <path d="M11.15 21.77c-2.14-2.01-3.491-5.012-3.491-8.284 0-3.272 1.351-6.274 3.491-8.284l3.572-2.217c-2.14-2.011-5.142-3.362-8.414-3.362-3.169 0-6.05 1.247-8.163 3.279l3.572 2.217c1.663-2.637 4.269-4.541 7.319-5.187-1.879 1.138-3.278 3.087-3.439 5.533 2.138-1.444 3.593-4.05 3.593-6.861 0-.715-.086-1.409-.249-2.067l3.572-2.217c.476 1.056.725 2.206.725 3.406 0 1.199-.249 2.35-.725 3.406h3.572c.077.574.122 1.161.122 1.759 0 6.652-5.554 12.103-12.102 12.103-6.549 0-12.103-5.451-12.103-12.103s5.554-12.103 12.103-12.103c3.272 0 6.274 1.351 8.414 3.362l-3.572 2.217z" fill="#FBBC05"/>
-            <path d="M23.78 14.614v-3.572h-3.572c-.077-.574-.122-1.161-.122-1.759 0-6.652 5.554-12.103 12.102-12.103v3.572-3.572c0 6.652-5.554 12.103-12.102 12.103H23.78z" fill="#EA4335"/>
-          </svg>
-          Sign In with Google
-        </button>
+        <div className="flex flex-col space-y-4 mb-4">
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="bg-white border border-gray-300 text-gray-800 px-4 py-3 rounded-lg w-full flex items-center justify-center shadow-md hover:bg-gray-50 transition-colors duration-200"
+          >
+            <svg className="mr-2" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24h21.351c.732 0 1.325-.593 1.325-1.325V1.325C24 .593 23.407 0 22.675 0zM7.138 20.452c-2.138-1.444-3.593-4.05-3.593-6.861 0-.715.086-1.409.249-2.067L.222 9.307C-.254 10.363-.503 11.513-.503 12.713c0 5.273 3.359 9.753 8.08 11.272-1.879-1.138-3.278-3.087-3.439-5.533" fill="#4285F4"/>
+              <path d="M23.78 9.307c-.476-1.056-.725-2.206-.725-3.406 0-1.199.249-2.35.725-3.406l-3.572-2.217c-1.663 2.637-4.269 4.541-7.319 5.187 1.879 1.138 3.278 3.087 3.439 5.533-2.138-1.444-3.593-4.05-3.593-6.861 0-.715.086-1.409.249-2.067L.222 9.307C-.254 10.363-.503 11.513-.503 12.713c0 5.273 3.359 9.753 8.08 11.272L11.15 21.77c-2.14-2.01-3.491-5.012-3.491-8.284 0-3.272 1.351-6.274 3.491-8.284l3.572-2.217c-2.14-2.011-5.142-3.362-8.414-3.362-6.549 0-12.103 5.451-12.103 12.103s5.554 12.103 12.103 12.103c6.548 0 12.102-5.451 12.102-12.103 0-.598-.045-1.185-.122-1.759H23.78z" fill="#34A853"/>
+              <path d="M11.15 21.77c-2.14-2.01-3.491-5.012-3.491-8.284 0-3.272 1.351-6.274 3.491-8.284l3.572-2.217c-2.14-2.011-5.142-3.362-8.414-3.362-3.169 0-6.05 1.247-8.163 3.279l3.572 2.217c1.663-2.637 4.269-4.541 7.319-5.187-1.879 1.138-3.278 3.087-3.439 5.533 2.138-1.444 3.593-4.05 3.593-6.861 0-.715-.086-1.409-.249-2.067l3.572-2.217c.476 1.056.725 2.206.725 3.406 0 1.199-.249 2.35-.725 3.406h3.572c.077.574.122 1.161.122 1.759 0 6.652-5.554 12.103-12.102 12.103-6.549 0-12.103-5.451-12.103-12.103s5.554-12.103 12.103-12.103c3.272 0 6.274 1.351 8.414 3.362l-3.572 2.217z" fill="#FBBC05"/>
+              <path d="M23.78 14.614v-3.572h-3.572c-.077-.574-.122-1.161-.122-1.759 0-6.652 5.554-12.103 12.102-12.103v3.572-3.572c0 6.652-5.554 12.103-12.102 12.103H23.78z" fill="#EA4335"/>
+            </svg>
+            Sign In with Google
+          </button>
+          
+          <button
+            onClick={() => {
+              setEmail('demo@demo.com');
+              setPassword('demodemo');
+              // Submit the form after a short delay to allow state to update
+              setTimeout(() => {
+                const form = document.querySelector('form');
+                if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
+              }, 100);
+            }}
+            type="button"
+            className="bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-3 rounded-lg w-full flex items-center justify-center shadow-md hover:bg-indigo-200 transition-colors duration-200"
+          >
+            <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            Try Demo Account
+          </button>
+        </div>
 
         <div className="text-center text-gray-500 my-4">OR</div>
 
@@ -93,7 +114,7 @@ export default function SignInPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={4}
               className="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
               placeholder="Enter your password"
             />
@@ -109,8 +130,11 @@ export default function SignInPage() {
             {loading ? 'Signing In...' : 'Sign In with Email'}
           </button>
         </form>
-        <div className="text-center mt-6">
-          <a href="/sign-up" className="text-indigo-500 hover:underline">Don't have an account? Sign Up</a>
+        <div className="text-center mt-6 space-y-2">
+          <a href="/sign-up" className="text-indigo-500 hover:underline block">Don't have an account? Sign Up</a>
+          <div className="text-xs text-gray-500">
+            <span className="font-medium text-indigo-500">Demo Account:</span> All changes will be reset on logout
+          </div>
         </div>
       </div>
     </div>

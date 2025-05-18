@@ -102,6 +102,14 @@ export async function GET(request: NextRequest) {
       const mealDate = new Date(rawMeal.uploaded_at).toISOString().split('T')[0];
       const mealName = metadata?.name || `Meal from ${restaurant || 'Unknown Restaurant'}`;
       
+      // Process dishes from metadata if they exist
+      let processedDishes: string[] = dishes;
+      if (metadata?.dishes && Array.isArray(metadata.dishes)) {
+        processedDishes = metadata.dishes.map((dish: any) => 
+          typeof dish === 'string' ? dish : (dish.name || '')
+        ).filter(Boolean);
+      }
+      
       // Add as a new meal with metadata or default values
       processedMeals.push({
         id: mealId,
@@ -109,7 +117,7 @@ export async function GET(request: NextRequest) {
         restaurant: metadata?.restaurant || restaurant,
         date: metadata?.date || mealDate,
         cuisine: metadata?.cuisine || cuisine,
-        dishes: metadata?.dishes || dishes,
+        dishes: processedDishes,
         notes: metadata?.notes || '',
         isFavorite: metadata?.is_favorite || false,
         imageUrl: rawMeal.image_url || ''

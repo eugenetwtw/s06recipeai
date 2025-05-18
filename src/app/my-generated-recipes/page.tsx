@@ -328,7 +328,13 @@ export default function MyGeneratedRecipesPage() {
                   {recipe.instructions && (
                     <div className="mt-2">
                       <p className="font-medium">Instructions:</p>
-                      <p className="line-clamp-3 italic">{recipe.instructions.substring(0, 150)}...</p>
+                      <p className="line-clamp-3 italic">
+                        {typeof recipe.instructions === 'string' 
+                          ? recipe.instructions.substring(0, 150) + '...'
+                          : typeof recipe.instructions === 'object'
+                            ? JSON.stringify(recipe.instructions).substring(0, 150) + '...'
+                            : String(recipe.instructions).substring(0, 150) + '...'}
+                      </p>
                     </div>
                   )}
                   

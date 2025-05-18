@@ -84,12 +84,22 @@ export async function GET(request: NextRequest) {
       // Create a name for the recipe based on the data
       const recipeName = metadata?.name || rawRecipe.recipe_name || 'Unnamed Recipe';
       
+      // Process instructions from the raw recipe
+      let processedInstructions: string = '';
+      if (Array.isArray(rawRecipe.instructions)) {
+        processedInstructions = rawRecipe.instructions.join('\n\n');
+      } else if (typeof rawRecipe.instructions === 'string') {
+        processedInstructions = rawRecipe.instructions;
+      } else if (rawRecipe.instructions) {
+        processedInstructions = JSON.stringify(rawRecipe.instructions);
+      }
+      
       // Add as a new recipe with metadata or default values
       processedRecipes.push({
         id: recipeId,
         name: recipeName,
         ingredients: metadata?.ingredients || ingredients,
-        instructions: rawRecipe.instructions,
+        instructions: processedInstructions,
         notes: metadata?.notes || '',
         isFavorite: metadata?.is_favorite || false,
         generatedAt: rawRecipe.generated_at
