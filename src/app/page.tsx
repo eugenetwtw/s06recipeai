@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabaseClient';
 
 export default function Home() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploadType, setUploadType] = useState<string>('refrigerator');
+  type UploadType = 'refrigerator' | 'kitchen_tools' | 'meal_history';
+  const [uploadType, setUploadType] = useState<UploadType>('refrigerator');
   const [user, setUser] = useState<any>(null);
   const [mealHistoryText, setMealHistoryText] = useState<string>('');
   const [processingText, setProcessingText] = useState<boolean>(false);
@@ -186,8 +187,19 @@ export default function Home() {
     }
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
   const handleFileUpload = async () => {
-    if (!selectedFiles.length) return;
+    if (!selectedFiles.length) {
+      setUploadError('Please select at least one file');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
+    setUploadSuccess(false);
 
     const formData = new FormData();
     selectedFiles.forEach((file) => {
@@ -198,21 +210,42 @@ export default function Home() {
     try {
       // Get the current user's access token
       const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
+      if (!session) {
+        throw new Error('Please sign in to upload files');
+      }
+      const accessToken = session.access_token;
 
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
         headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+      
       const result = await response.json();
-      console.log(result);
+      console.log('Upload successful:', result);
+      setUploadSuccess(true);
+      
       // Refresh data after successful upload
       if (user) {
-        fetchUserData(user.id);
+        await fetchUserData(user.id);
       }
+      
+      // Clear selection after successful upload
+      setSelectedFiles([]);
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => setUploadSuccess(false), 3000);
+      
     } catch (error) {
-      console.error('Upload failed', error);
+      console.error('Upload failed:', error);
+      setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -335,7 +368,7 @@ export default function Home() {
               <div className="flex flex-col gap-4">
                 <select 
                   value={uploadType} 
-                  onChange={(e) => setUploadType(e.target.value)}
+                  onChange={(e) => setUploadType(e.target.value as UploadType)}
                   className="input-primary"
                 >
                   <option value="refrigerator">Refrigerator Contents</option>
@@ -345,19 +378,63 @@ export default function Home() {
                 
                 {uploadType === 'meal_history' ? (
                   <>
-                    <div className="flex flex-col md:flex-row gap-4">
-                      <input
-                        type="file"
-                        multiple
-                        onChange={(e) => setSelectedFiles(e.target.files ? Array.from(e.target.files) : [])}
-                        className="input-primary flex-1"
-                      />
-                      <button
-                        onClick={handleFileUpload}
-                        className="btn-primary"
-                      >
-                        Choose photos to upload
-                      </button>
+                    <div className="space-y-4">
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            setSelectedFiles(e.target.files ? Array.from(e.target.files) : []);
+                            setUploadError(null);
+                          }}
+                          className="input-primary flex-1"
+                          disabled={isUploading}
+                        />
+                        <button
+                          onClick={handleFileUpload}
+                          disabled={isUploading || !selectedFiles.length}
+                          className="btn-primary whitespace-nowrap"
+                        >
+                          {isUploading ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Uploading...
+                            </span>
+                          ) : 'Upload Photos'}
+                        </button>
+                      </div>
+                      
+                      {selectedFiles.length > 0 && (
+                        <div className="text-sm text-gray-600">
+                          Selected {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}
+                        </div>
+                      )}
+                      
+                      {uploadError && (
+                        <div className="text-red-500 text-sm mt-2 p-2 bg-red-50 rounded">
+                          {uploadError}
+                        </div>
+                      )}
+                      
+                      {uploadSuccess && (
+                        <div className="text-green-600 text-sm mt-2 p-2 bg-green-50 rounded">
+                          {(() => {
+                            const type = uploadType as string;
+                            if (type === 'kitchen_tools') {
+                              return 'Upload successful! Processing your kitchen tools...';
+                            } else if (type === 'refrigerator') {
+                              return 'Upload successful! Processing your refrigerator contents...';
+                            } else if (type === 'meal_history') {
+                              return 'Upload successful! Processing your meal history...';
+                            }
+                            return 'Upload successful! Processing...';
+                          })()}
+                        </div>
+                      )}
                     </div>
                     
                     <div className="mt-4">
