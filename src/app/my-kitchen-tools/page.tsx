@@ -12,6 +12,8 @@ interface KitchenTool {
   lastMaintenanceDate?: string;
   notes?: string;
   isFavorite: boolean;
+  imageUrl?: string;
+  rawToolId?: string;
 }
 
 export default function MyKitchenToolsPage() {
@@ -33,8 +35,10 @@ export default function MyKitchenToolsPage() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
 
   // Categories for kitchen tools
   const categories = [
@@ -325,6 +329,7 @@ export default function MyKitchenToolsPage() {
     }
 
     setIsUploading(true);
+    setProcessingStatus('Preparing to upload files...');
     setUploadError(null);
     setUploadSuccess(false);
 
@@ -341,6 +346,7 @@ export default function MyKitchenToolsPage() {
         throw new Error('Authentication required');
       }
 
+      setProcessingStatus('Uploading photos to server...');
       // Upload the files
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -358,9 +364,17 @@ export default function MyKitchenToolsPage() {
       const result = await response.json();
       setUploadSuccess(true);
       
+      setProcessingStatus('AI is analyzing your kitchen tools...');
+      setIsProcessing(true);
+      
+      // Artificial delay to show processing message (AI analysis happens on server)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setProcessingStatus('Updating your kitchen tools inventory...');
       // Refresh the kitchen tools list
       await fetchKitchenTools();
       
+      setIsProcessing(false);
       // Show success message
       alert('Kitchen tool photos uploaded successfully! AI has analyzed your photos and added the detected tools to your inventory.');
     } catch (error) {
@@ -369,6 +383,8 @@ export default function MyKitchenToolsPage() {
       alert('Failed to upload kitchen tool photos. Please try again.');
     } finally {
       setIsUploading(false);
+      setIsProcessing(false);
+      setProcessingStatus('');
       // Reset the file input
       e.target.value = '';
     }
@@ -458,6 +474,22 @@ export default function MyKitchenToolsPage() {
         </div>
       </div>
 
+      {/* Processing Status Indicator */}
+      {(isUploading || isProcessing) && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center">
+          <div className="mr-4">
+            <svg className="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium text-blue-700">{processingStatus}</p>
+            <p className="text-sm text-blue-600">Please wait while we process your request...</p>
+          </div>
+        </div>
+      )}
+
       {/* Kitchen Tools List */}
       <div className="bg-white shadow-md rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4 text-indigo-700">Your Kitchen Tools</h2>
@@ -487,6 +519,21 @@ export default function MyKitchenToolsPage() {
                     ★
                   </button>
                 </div>
+                
+                {/* Display image thumbnail if available */}
+                {tool.imageUrl && (
+                  <div className="mt-3 mb-3">
+                    <img 
+                      src={tool.imageUrl} 
+                      alt={tool.name}
+                      className="w-full h-48 object-cover rounded-md shadow-sm"
+                      onError={(e) => {
+                        // Handle image loading errors
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 
                 <div className="mt-2 text-sm text-gray-600">
                   <p>Category: <span className="font-medium">{categories.find(c => c.id === tool.category)?.name || tool.category}</span></p>

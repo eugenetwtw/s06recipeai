@@ -14,6 +14,8 @@ interface MealHistoryItem {
   notes?: string;
   isFavorite: boolean;
   imageUrl?: string;
+  detected_ingredients?: any; // Add this to store the AI-detected meal data
+  natural_language_summary?: string; // Add this to store the AI-generated summary
 }
 
 export default function MyMealHistoryPage() {
@@ -38,8 +40,10 @@ export default function MyMealHistoryPage() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCuisine, setSelectedCuisine] = useState<string>('all');
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string>('');
 
   // Common cuisines for filtering
   const cuisines = [
@@ -98,7 +102,9 @@ export default function MyMealHistoryPage() {
       }
       
       const meals = await response.json();
-      setMealHistory(meals);
+      // Process each meal to extract data from detected_ingredients
+      const processedMeals = meals.map((meal: MealHistoryItem) => extractMealData(meal));
+      setMealHistory(processedMeals);
     } catch (error) {
       console.error('Error fetching meal history:', error);
     } finally {
@@ -380,6 +386,7 @@ export default function MyMealHistoryPage() {
     }
 
     setIsUploading(true);
+    setProcessingStatus('Preparing to upload files...');
     setUploadError(null);
     setUploadSuccess(false);
 
@@ -396,6 +403,7 @@ export default function MyMealHistoryPage() {
         throw new Error('Authentication required');
       }
 
+      setProcessingStatus('Uploading photos to server...');
       // Upload the files
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -412,6 +420,9 @@ export default function MyMealHistoryPage() {
 
       const result = await response.json();
       setUploadSuccess(true);
+      
+      setProcessingStatus('AI is analyzing your meal photos...');
+      setIsProcessing(true);
       
       // Process the uploaded images with the meal history processing API
       const processResponse = await fetch('/api/process-meal-history', {
@@ -431,9 +442,11 @@ export default function MyMealHistoryPage() {
         throw new Error(errorData.error || 'Failed to process meal history');
       }
       
+      setProcessingStatus('Updating your meal history...');
       // Refresh the meal history list
       await fetchMealHistory();
       
+      setIsProcessing(false);
       // Show success message
       alert('Meal history photos uploaded successfully! AI has analyzed your photos and added the detected meals to your history.');
     } catch (error) {
@@ -442,9 +455,41 @@ export default function MyMealHistoryPage() {
       alert('Failed to upload meal history photos. Please try again.');
     } finally {
       setIsUploading(false);
+      setIsProcessing(false);
+      setProcessingStatus('');
       // Reset the file input
       e.target.value = '';
     }
+  };
+
+  // Helper function to extract data from detected_ingredients
+  const extractMealData = (meal: MealHistoryItem) => {
+    // Check if meal has detected_ingredients and it's an object
+    if (meal.detected_ingredients && typeof meal.detected_ingredients === 'object') {
+      const ingredients = meal.detected_ingredients;
+      
+      // Extract restaurant name
+      if ('restaurant_name' in ingredients && ingredients.restaurant_name) {
+        meal.restaurant = ingredients.restaurant_name;
+      }
+      
+      // Extract cuisine type
+      if ('cuisine_type' in ingredients && ingredients.cuisine_type) {
+        meal.cuisine = ingredients.cuisine_type;
+      }
+      
+      // Extract dishes
+      if ('dishes' in ingredients && Array.isArray(ingredients.dishes)) {
+        meal.dishes = ingredients.dishes;
+      }
+      
+      // Extract date if available and meal.date is not already set
+      if ('order_date' in ingredients && ingredients.order_date && (!meal.date || meal.date === new Date().toISOString().split('T')[0])) {
+        meal.date = ingredients.order_date;
+      }
+    }
+    
+    return meal;
   };
 
   // Helper function to get cuisine string value
@@ -556,6 +601,22 @@ export default function MyMealHistoryPage() {
         </div>
       </div>
 
+      {/* Processing Status Indicator */}
+      {(isUploading || isProcessing) && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center">
+          <div className="mr-4">
+            <svg className="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <div>
+            <p className="font-medium text-blue-700">{processingStatus}</p>
+            <p className="text-sm text-blue-600">Please wait while we process your request...</p>
+          </div>
+        </div>
+      )}
+
       {/* Meal History List */}
       <div className="bg-white shadow-md rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4 text-indigo-700">Your Meal History</h2>
@@ -587,6 +648,10 @@ export default function MyMealHistoryPage() {
                 </div>
                 
                 <div className="mt-2 text-sm text-gray-600">
+                  {meal.natural_language_summary && (
+                    <p className="mb-2 italic text-gray-700">{meal.natural_language_summary}</p>
+                  )}
+                  
                   <p>Restaurant: <span className="font-medium">{meal.restaurant}</span></p>
                   <p>Date: <span className="font-medium">{new Date(meal.date).toLocaleDateString()}</span></p>
                   <p>Cuisine: <span className="font-medium">
@@ -611,11 +676,15 @@ export default function MyMealHistoryPage() {
                   )}
                   
                   {meal.imageUrl && (
-                    <div className="mt-2">
+                    <div className="mt-3 mb-3">
                       <img 
                         src={meal.imageUrl} 
-                        alt={meal.name} 
-                        className="w-full h-32 object-cover rounded-lg" 
+                        alt={meal.name}
+                        className="w-full h-48 object-cover rounded-md shadow-sm"
+                        onError={(e) => {
+                          // Handle image loading errors
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}

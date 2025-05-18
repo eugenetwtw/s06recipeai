@@ -88,8 +88,14 @@ export async function GET(request: NextRequest) {
               condition: metadata?.condition || 'good',
               lastMaintenanceDate: metadata?.last_maintenance_date || '',
               notes: metadata?.notes || '',
-              isFavorite: metadata?.is_favorite || false
+              isFavorite: metadata?.is_favorite || false,
+              imageUrl: rawTool.image_url || '', // Include the image URL
+              rawToolId: rawTool.id // Include the raw tool ID for reference
             });
+          } else if (!existingTool.imageUrl && rawTool.image_url) {
+            // If the tool exists but doesn't have an image, add the image
+            existingTool.imageUrl = rawTool.image_url;
+            existingTool.rawToolId = rawTool.id;
           }
         });
       }

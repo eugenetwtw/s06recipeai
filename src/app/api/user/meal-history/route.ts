@@ -120,7 +120,9 @@ export async function GET(request: NextRequest) {
         dishes: processedDishes,
         notes: metadata?.notes || '',
         isFavorite: metadata?.is_favorite || false,
-        imageUrl: rawMeal.image_url || ''
+        imageUrl: rawMeal.image_url || '',
+        detected_ingredients: rawMeal.detected_ingredients || null, // Include the raw detected_ingredients
+        natural_language_summary: rawMeal.natural_language_summary || '' // Include the summary
       });
     });
 
