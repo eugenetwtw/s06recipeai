@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { useI18n } from '@/i18n/I18nContext';
-import LanguageSelector from '@/components/LanguageSelector';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -72,9 +71,6 @@ export default function SignUpPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50">
-      <div className="absolute top-4 right-4">
-        <LanguageSelector />
-      </div>
       <div className="bg-white p-8 shadow-lg rounded-xl max-w-md w-full">
         <h1 className="text-3xl font-bold mb-6 text-indigo-600 text-center">{t('auth.signUp.title')}</h1>
         

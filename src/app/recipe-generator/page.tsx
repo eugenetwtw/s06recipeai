@@ -207,7 +207,7 @@ export default function RecipeGeneratorPage() {
               </div>
             </div>
           )}
-          <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
+          <a href={`/?lang=${useI18n().locale}`} className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
             {t('common.backToHomepage')}
           </a>
         </div>

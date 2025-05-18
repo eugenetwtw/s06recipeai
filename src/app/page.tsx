@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ReactMarkdown from 'react-markdown';
 import { useI18n } from '@/i18n/I18nContext';
-import LanguageSelector from '@/components/LanguageSelector';
 
 export default function Home() {
   const router = useRouter();
@@ -356,13 +355,11 @@ export default function Home() {
                 >
                   {t('common.signOut')}
                 </button>
-                <LanguageSelector />
               </div>
             ) : (
               <div className="flex space-x-3">
                 <a href={`/sign-in?lang=${useI18n().locale}`} className="bg-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">{t('common.signIn')}</a>
                 <a href={`/sign-up?lang=${useI18n().locale}`} className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors">{t('common.signUp')}</a>
-                <LanguageSelector />
               </div>
             )}
           </div>
@@ -561,7 +558,7 @@ export default function Home() {
               </button>
               
               <a 
-                href="/recipe-generator"
+                href={`/recipe-generator?lang=${useI18n().locale}`}
                 className="bg-teal-600 text-white rounded-full px-6 py-3 text-sm font-medium shadow-sm hover:bg-teal-700 transition-colors flex items-center justify-center"
               >
                 {t('home.tryItNow.createCustomRecipe')}

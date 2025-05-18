@@ -51,20 +51,23 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
       return urlLocale;
     }
     
-    // Then check browser language
-    if (typeof window !== 'undefined') {
-      const browserLocale = navigator.language;
-      // Check for Chinese variants
-      if (browserLocale.startsWith('zh-')) {
-        return 'zh-Hant';
-      }
-    }
-    
-    // Default to English
+    // For SSR consistency, always default to English when no lang parameter is present
+    // This prevents hydration errors when the server and client detect different languages
     return 'en';
   };
   
   const [locale, setLocaleState] = useState<string>(getInitialLocale());
+  
+  // After initial render, check browser language if no lang parameter was provided
+  useEffect(() => {
+    if (!searchParams.get('lang') && typeof window !== 'undefined') {
+      const browserLocale = navigator.language;
+      // Check for Chinese variants
+      if (browserLocale.startsWith('zh-')) {
+        setLocaleState('zh-Hant');
+      }
+    }
+  }, [searchParams]);
   
   // Get translations based on locale
   const getTranslations = (locale: string): TranslationsType => {
@@ -102,7 +105,20 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale;
     }
+    
+    // Store the selected language in localStorage for persistence across pages
+    localStorage.setItem('preferred-language', locale);
   }, [locale, pathname, searchParams]);
+  
+  // Load the preferred language from localStorage on initial render
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedLanguage = localStorage.getItem('preferred-language');
+      if (storedLanguage && Object.keys(locales).includes(storedLanguage)) {
+        setLocaleState(storedLanguage);
+      }
+    }
+  }, []);
   
   // Set locale and update URL
   const setLocale = (newLocale: string) => {

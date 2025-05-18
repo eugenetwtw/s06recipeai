@@ -4,6 +4,7 @@ import './globals.css'
 import { I18nProvider } from '@/i18n/I18nContext'
 import { headers } from 'next/headers'
 import AuthHandler from '@/components/AuthHandler'
+import LanguageSelector from '@/components/LanguageSelector'
 
 const inter = Inter({ subsets: ['latin', 'latin-ext'] })
 
@@ -46,6 +47,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <I18nProvider>
           <AuthHandler />
+          <div className="fixed top-4 right-4 z-50">
+            <LanguageSelector />
+          </div>
           {children}
         </I18nProvider>
       </body>

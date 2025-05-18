@@ -16,11 +16,11 @@ export function middleware(request: NextRequest) {
   const isStaticAsset = /\.(jpg|jpeg|png|gif|svg|ico|css|js)$/i.test(pathname);
   const isAuthCallback = pathname.startsWith('/api/auth-callback');
   
-  // Skip redirects for specific pages
-  const isRecipeGenerator = pathname.startsWith('/recipe-generator');
+  // If no language parameter is present and it's not an API route, auth callback, or static asset, detect the language and redirect
+  // But only do this for the initial page load, not for subsequent navigation
+  const isInitialPageLoad = !request.headers.get('referer')?.includes(request.nextUrl.origin);
   
-  // If no language parameter is present and it's not an API route, auth callback, static asset, or recipe generator, detect the language and redirect
-  if (!langParam && !isApiRoute && !isStaticAsset && !isAuthCallback && !isRecipeGenerator) {
+  if (!langParam && !isApiRoute && !isStaticAsset && !isAuthCallback && isInitialPageLoad) {
     // Get the preferred language from the Accept-Language header
     const acceptLanguage = request.headers.get('accept-language') || '';
     
@@ -50,8 +50,18 @@ export function middleware(request: NextRequest) {
     
     // Create a new URL with the detected language
     const newUrl = new URL(request.nextUrl);
-    // Preserve the original pathname instead of always redirecting to root
-    newUrl.searchParams.set('lang', detectedLocale);
+    
+    // Special handling for recipe-generator page - preserve the pathname
+    const isRecipeGenerator = pathname.startsWith('/recipe-generator');
+    
+    if (isRecipeGenerator) {
+      // For recipe-generator, just add the lang parameter without changing the pathname
+      newUrl.searchParams.set('lang', detectedLocale);
+    } else {
+      // For other pages, redirect to root with lang parameter
+      newUrl.pathname = '/';
+      newUrl.searchParams.set('lang', detectedLocale);
+    }
     
     // Redirect to the new URL with the language parameter
     return NextResponse.redirect(newUrl);
