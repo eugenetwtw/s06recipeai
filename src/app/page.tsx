@@ -746,7 +746,18 @@ export default function Home() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Kitchen Tools</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-indigo-700">Your Kitchen Tools</h2>
+                <a 
+                  href="/my-kitchen-tools" 
+                  className="btn-secondary text-sm px-3 py-1 flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Manage Tools
+                </a>
+              </div>
               {kitchenToolsData.length > 0 ? (
                 <ul className="space-y-2">
                   {kitchenToolsData.map((item, index) => (
@@ -757,7 +768,10 @@ export default function Home() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-600">No kitchen tools data uploaded yet.</p>
+                <div className="text-center py-4">
+                  <p className="text-gray-600 mb-3">No kitchen tools data uploaded yet.</p>
+                  <a href="/my-kitchen-tools" className="btn-primary text-sm">Add Kitchen Tools</a>
+                </div>
               )}
             </div>
 
