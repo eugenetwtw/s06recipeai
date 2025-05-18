@@ -355,7 +355,10 @@ export default function Home() {
             <div className="text-center mb-16 py-12">
               <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">Transform Your Kitchen <span className="text-indigo-600">Into a Culinary Studio</span></h2>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
-                Recipe AI turns your ingredients into delicious recipes tailored to your taste preferences and kitchen tools.
+                Recipe AI uses advanced computer vision to analyze photos of your refrigerator or ingredients, instantly creating personalized recipes you'll love.
+              </p>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+                Upload your food delivery history, and our AI will design healthier, homemade versions of your favorite restaurant meals. In a world where quality delivery food is often too expensive and budget options lack nutrition, Recipe AI helps you cook delicious, nutritious meals at home.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/sign-up" className="bg-indigo-600 text-white rounded-full px-8 py-4 text-lg font-medium shadow-md hover:bg-indigo-700 transition-colors">Get Started Free</a>
@@ -376,7 +379,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">Snap & Cook</h3>
                 <p className="text-gray-600">
-                  Simply take a photo of your ingredients and let our AI suggest personalized recipes in seconds.
+                  Our cutting-edge computer vision instantly recognizes ingredients in your refrigerator photos, transforming random items into delicious meals you never thought possible.
                 </p>
               </div>
               
@@ -386,9 +389,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Smart Recommendations</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Delivery History Analysis</h3>
                 <p className="text-gray-600">
-                  Our AI learns your taste preferences and suggests recipes you'll love based on your meal history.
+                  Upload your UberEats or food delivery history, and our AI creates healthier, budget-friendly homemade versions of your favorite restaurant meals that taste just as good.
                 </p>
               </div>
               
@@ -398,9 +401,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Personalized Experience</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Nutritional Intelligence</h3>
                 <p className="text-gray-600">
-                  Track your kitchen tools and meal history to get increasingly personalized recipe suggestions.
+                  Our AI balances taste with nutrition, creating recipes that are both delicious and healthy. Break free from expensive delivery food and cook nutritious meals at home.
                 </p>
               </div>
             </div>
@@ -458,7 +461,7 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-600 italic">
-                    "Recipe AI has transformed how I cook. I no longer waste food because I can create delicious meals with whatever I have in my fridge!"
+                    "Recipe AI has transformed how I cook. I've cut my food delivery spending by 70% and now make restaurant-quality meals at home with whatever ingredients I have in my fridge!"
                   </p>
                 </div>
                 
@@ -471,7 +474,7 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-600 italic">
-                    "As someone who's always short on time, Recipe AI helps me quickly decide what to cook without endless browsing through recipe sites."
+                    "I used to spend a fortune on food delivery that was either expensive and good or cheap and unhealthy. Recipe AI analyzes my UberEats history and creates healthier versions I can make at home in less time than delivery takes!"
                   </p>
                 </div>
                 
@@ -484,7 +487,7 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-600 italic">
-                    "The personalized recommendations are spot on! Recipe AI seems to understand my taste preferences better than I do sometimes."
+                    "The AI vision technology is incredible - I just snap a photo of my refrigerator and it identifies everything inside, suggesting creative recipes I'd never think of. I'm eating healthier and saving money by cooking at home instead of ordering out."
                   </p>
                 </div>
               </div>
