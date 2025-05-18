@@ -6,7 +6,9 @@
     "signUp": "Sign Up",
     "signOut": "Sign Out",
     "demoMode": "Demo Mode",
-    "language": "Language"
+    "language": "Language",
+    "allRightsReserved": "All rights reserved",
+    "backToHomepage": "Back to Homepage"
   },
   "home": {
     "hero": {
@@ -139,9 +141,21 @@
     }
   },
   "recipeGenerator": {
+    "title": "Recipe Generator",
+    "addIngredients": "Add Ingredients",
+    "enterIngredient": "Enter an ingredient",
+    "add": "Add",
+    "generateRecipe": "Generate Recipe",
+    "generating": "Generating...",
     "generatedRecipe": "Generated Recipe",
     "copyToClipboard": "Copy to clipboard",
-    "recipeCopied": "Recipe copied to clipboard!"
+    "recipeCopied": "Recipe copied to clipboard!",
+    "recipeDetails": "Recipe Details:",
+    "recipeWillAppear": "Your recipe will appear here",
+    "cooking": "Cooking up something delicious...",
+    "inspiredByFavorites": "Inspired by your favorite meals:",
+    "clickToAdd": "Click on a dish to add it as an ingredient",
+    "addIngredientAlert": "Please add at least one ingredient"
   },
   "myKitchenTools": {
     "title": "My Kitchen Tools",

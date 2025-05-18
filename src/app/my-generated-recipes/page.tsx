@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/i18n/I18nContext';
 
 interface GeneratedRecipe {
   id: string;
@@ -16,6 +17,7 @@ interface GeneratedRecipe {
 
 export default function MyGeneratedRecipesPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [recipes, setRecipes] = useState<GeneratedRecipe[]>([]);

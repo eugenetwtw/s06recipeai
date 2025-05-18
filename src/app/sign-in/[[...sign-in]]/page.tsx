@@ -9,7 +9,7 @@ import LanguageSelector from '@/components/LanguageSelector';
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -104,16 +104,14 @@ export default function SignInPage() {
           <button
             onClick={() => {
               if (!signedOut) {
-                // Get the current locale from the URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const locale = urlParams.get('lang') || 'en';
-                
+                // Set the appropriate demo account based on current language
                 if (locale === 'zh-Hant') {
                   setEmail('demo-zh-Hant@demo.com');
                 } else {
                   setEmail('demo@demo.com');
                 }
                 setPassword('demodemo');
+                
                 // Submit the form after a short delay to allow state to update
                 setTimeout(() => {
                   const form = document.querySelector('form');

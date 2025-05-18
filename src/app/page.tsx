@@ -373,17 +373,17 @@ export default function Home() {
           <>
             {/* Hero Section */}
             <div className="text-center mb-16 py-12">
-              <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">Transform Your Kitchen <span className="text-indigo-600">Into a Culinary Studio</span></h2>
+              <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">{t('home.hero.title')}</h2>
               <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
-                Recipe AI uses advanced computer vision to analyze photos of your refrigerator or ingredients, instantly creating personalized recipes you'll love.
+                {t('home.hero.subtitle')}
               </p>
               <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-                Upload your food delivery history, and our AI will design healthier, homemade versions of your favorite restaurant meals. In a world where quality delivery food is often too expensive and budget options lack nutrition, Recipe AI helps you cook delicious, nutritious meals at home.
+                {t('home.hero.description')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/sign-up" className="bg-indigo-600 text-white rounded-full px-8 py-4 text-lg font-medium shadow-md hover:bg-indigo-700 transition-colors">Get Started Free</a>
+                <a href="/sign-up" className="bg-indigo-600 text-white rounded-full px-8 py-4 text-lg font-medium shadow-md hover:bg-indigo-700 transition-colors">{t('home.hero.getStarted')}</a>
                 <a href="#how-it-works" className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-8 py-4 text-lg font-medium shadow-sm hover:bg-indigo-50 transition-colors">
-                  How It Works
+                  {t('home.hero.howItWorks')}
                 </a>
               </div>
             </div>
@@ -397,9 +397,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Snap & Cook</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{t('home.features.snapAndCook.title')}</h3>
                 <p className="text-gray-600">
-                  Our cutting-edge computer vision instantly recognizes ingredients in your refrigerator photos, transforming random items into delicious meals you never thought possible.
+                  {t('home.features.snapAndCook.description')}
                 </p>
               </div>
               
@@ -409,9 +409,9 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Delivery History Analysis</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{t('home.features.deliveryHistory.title')}</h3>
                 <p className="text-gray-600">
-                  Upload your UberEats or food delivery history, and our AI creates healthier, budget-friendly homemade versions of your favorite restaurant meals that taste just as good.
+                  {t('home.features.deliveryHistory.description')}
                 </p>
               </div>
               
@@ -421,47 +421,47 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Nutritional Intelligence</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">{t('home.features.nutritionalIntelligence.title')}</h3>
                 <p className="text-gray-600">
-                  Our AI balances taste with nutrition, creating recipes that are both delicious and healthy. Break free from expensive delivery food and cook nutritious meals at home.
+                  {t('home.features.nutritionalIntelligence.description')}
                 </p>
               </div>
             </div>
 
             {/* How It Works Section */}
             <div id="how-it-works" className="mb-16">
-              <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">How Recipe AI Works</h2>
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">{t('home.howItWorks.title')}</h2>
               
               <div className="grid md:grid-cols-4 gap-8">
                 <div className="text-center">
                   <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">1</div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">Upload Photos</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">{t('home.howItWorks.step1.title')}</h3>
                   <p className="text-gray-600 text-sm">
-                    Take photos of your ingredients or refrigerator contents
+                    {t('home.howItWorks.step1.description')}
                   </p>
                 </div>
                 
                 <div className="text-center">
                   <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">2</div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">AI Analysis</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">{t('home.howItWorks.step2.title')}</h3>
                   <p className="text-gray-600 text-sm">
-                    Our AI identifies ingredients and considers your preferences
+                    {t('home.howItWorks.step2.description')}
                   </p>
                 </div>
                 
                 <div className="text-center">
                   <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">3</div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">Recipe Generation</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">{t('home.howItWorks.step3.title')}</h3>
                   <p className="text-gray-600 text-sm">
-                    Get personalized recipes based on your ingredients and taste
+                    {t('home.howItWorks.step3.description')}
                   </p>
                 </div>
                 
                 <div className="text-center">
                   <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">4</div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">Cook & Enjoy</h3>
+                  <h3 className="text-lg font-bold text-gray-800 mb-2">{t('home.howItWorks.step4.title')}</h3>
                   <p className="text-gray-600 text-sm">
-                    Follow the recipe and enjoy your delicious meal
+                    {t('home.howItWorks.step4.description')}
                   </p>
                 </div>
               </div>
@@ -469,19 +469,19 @@ export default function Home() {
 
             {/* Testimonials */}
             <div className="mb-16">
-              <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">What Our Users Say</h2>
+              <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">{t('home.testimonials.title')}</h2>
               
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">J</div>
                     <div>
-                      <h4 className="font-bold text-gray-800">Jessica T.</h4>
-                      <p className="text-gray-500 text-sm">Home Cook</p>
+                      <h4 className="font-bold text-gray-800">{t('home.testimonials.testimonial1.name')}</h4>
+                      <p className="text-gray-500 text-sm">{t('home.testimonials.testimonial1.role')}</p>
                     </div>
                   </div>
                   <p className="text-gray-600 italic">
-                    "Recipe AI has transformed how I cook. I've cut my food delivery spending by 70% and now make restaurant-quality meals at home with whatever ingredients I have in my fridge!"
+                    {t('home.testimonials.testimonial1.quote')}
                   </p>
                 </div>
                 
@@ -489,12 +489,12 @@ export default function Home() {
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">M</div>
                     <div>
-                      <h4 className="font-bold text-gray-800">Michael R.</h4>
-                      <p className="text-gray-500 text-sm">Busy Professional</p>
+                      <h4 className="font-bold text-gray-800">{t('home.testimonials.testimonial2.name')}</h4>
+                      <p className="text-gray-500 text-sm">{t('home.testimonials.testimonial2.role')}</p>
                     </div>
                   </div>
                   <p className="text-gray-600 italic">
-                    "I used to spend a fortune on food delivery that was either expensive and good or cheap and unhealthy. Recipe AI analyzes my UberEats history and creates healthier versions I can make at home in less time than delivery takes!"
+                    {t('home.testimonials.testimonial2.quote')}
                   </p>
                 </div>
                 
@@ -502,12 +502,12 @@ export default function Home() {
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">S</div>
                     <div>
-                      <h4 className="font-bold text-gray-800">Sarah K.</h4>
-                      <p className="text-gray-500 text-sm">Food Enthusiast</p>
+                      <h4 className="font-bold text-gray-800">{t('home.testimonials.testimonial3.name')}</h4>
+                      <p className="text-gray-500 text-sm">{t('home.testimonials.testimonial3.role')}</p>
                     </div>
                   </div>
                   <p className="text-gray-600 italic">
-                    "The AI vision technology is incredible - I just snap a photo of my refrigerator and it identifies everything inside, suggesting creative recipes I'd never think of. I'm eating healthier and saving money by cooking at home instead of ordering out."
+                    {t('home.testimonials.testimonial3.quote')}
                   </p>
                 </div>
               </div>
@@ -517,11 +517,11 @@ export default function Home() {
         
         {/* Try It Now Section - always shown */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-12 transition-all hover:shadow-md">
-          <h2 className="text-2xl font-bold mb-8 text-indigo-700">Try Recipe AI Now</h2>
+          <h2 className="text-2xl font-bold mb-8 text-indigo-700">{t('home.tryItNow.title')}</h2>
           
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Upload photos of ingredients</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('home.tryItNow.uploadPhotos')}</label>
               <div className="relative">
                 <input
                   type="file"
@@ -537,7 +537,7 @@ export default function Home() {
                 
                 {selectedFiles.length > 0 && (
                   <div className="mt-2 text-sm text-gray-600">
-                    Selected {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''}
+                    {selectedFiles.length > 0 && `Selected ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}`}
                   </div>
                 )}
               </div>
@@ -557,14 +557,14 @@ export default function Home() {
                     </svg>
                     Uploading...
                   </span>
-                ) : 'Upload Photos'}
+                ) : t('home.tryItNow.uploadButton')}
               </button>
               
               <a 
                 href="/recipe-generator"
                 className="bg-teal-600 text-white rounded-full px-6 py-3 text-sm font-medium shadow-sm hover:bg-teal-700 transition-colors flex items-center justify-center"
               >
-                Create Custom Recipe
+                {t('home.tryItNow.createCustomRecipe')}
               </a>
             </div>
           </div>
@@ -766,39 +766,39 @@ export default function Home() {
         <div className="container max-w-6xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Recipe AI</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">{t('common.appName')}</h3>
               <p className="text-gray-600 text-sm">
-                Transform your kitchen into a culinary studio with AI-powered recipe suggestions tailored to your ingredients and preferences.
+                {t('home.footer.description')}
               </p>
             </div>
             
             <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Features</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">{t('home.footer.features')}</h3>
               <ul className="text-gray-600 text-sm space-y-2">
-                <li><a href="#" className="hover:text-indigo-600">Photo Recognition</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Smart Recommendations</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Kitchen Tools Tracking</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Meal History</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.photoRecognition')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.smartRecommendations')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.kitchenToolsTracking')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.mealHistory')}</a></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Company</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">{t('home.footer.company')}</h3>
               <ul className="text-gray-600 text-sm space-y-2">
-                <li><a href="#" className="hover:text-indigo-600">About Us</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Contact</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Careers</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Blog</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.aboutUs')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.contact')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.careers')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.blog')}</a></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Legal</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-4">{t('home.footer.legal')}</h3>
               <ul className="text-gray-600 text-sm space-y-2">
-                <li><a href="#privacy-policy" className="hover:text-indigo-600">Privacy Policy</a></li>
-                <li><a href="#terms-of-service" className="hover:text-indigo-600">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-indigo-600">GDPR</a></li>
+                <li><a href="#privacy-policy" className="hover:text-indigo-600">{t('home.footer.privacyPolicy')}</a></li>
+                <li><a href="#terms-of-service" className="hover:text-indigo-600">{t('home.footer.termsOfService')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.cookiePolicy')}</a></li>
+                <li><a href="#" className="hover:text-indigo-600">{t('home.footer.gdpr')}</a></li>
               </ul>
             </div>
           </div>
@@ -806,7 +806,7 @@ export default function Home() {
           <div className="border-t border-gray-200 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-gray-500 text-sm mb-4 md:mb-0">
-                © {new Date().getFullYear()} Recipe AI. All rights reserved.
+                © {new Date().getFullYear()} {t('common.appName')}. {t('common.allRightsReserved')}
               </p>
               <div className="flex space-x-6">
                 <a href="#" className="text-gray-400 hover:text-indigo-600">

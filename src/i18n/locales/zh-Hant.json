@@ -6,7 +6,9 @@
     "signUp": "註冊",
     "signOut": "登出",
     "demoMode": "示範模式",
-    "language": "語言"
+    "language": "語言",
+    "allRightsReserved": "保留所有權利",
+    "backToHomepage": "返回首頁"
   },
   "home": {
     "hero": {
@@ -139,9 +141,21 @@
     }
   },
   "recipeGenerator": {
+    "title": "食譜生成器",
+    "addIngredients": "添加食材",
+    "enterIngredient": "輸入食材",
+    "add": "添加",
+    "generateRecipe": "生成食譜",
+    "generating": "生成中...",
     "generatedRecipe": "已生成的食譜",
     "copyToClipboard": "複製到剪貼板",
-    "recipeCopied": "食譜已複製到剪貼板！"
+    "recipeCopied": "食譜已複製到剪貼板！",
+    "recipeDetails": "食譜詳情：",
+    "recipeWillAppear": "您的食譜將顯示在這裡",
+    "cooking": "正在烹飪美味佳餚...",
+    "inspiredByFavorites": "受您喜愛的餐點啟發：",
+    "clickToAdd": "點擊一個菜品將其添加為食材",
+    "addIngredientAlert": "請至少添加一種食材"
   },
   "myKitchenTools": {
     "title": "我的廚房工具",

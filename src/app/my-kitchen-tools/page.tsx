@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/i18n/I18nContext';
 
 interface KitchenTool {
   id: string;
@@ -18,6 +19,7 @@ interface KitchenTool {
 
 export default function MyKitchenToolsPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
   const [kitchenTools, setKitchenTools] = useState<KitchenTool[]>([]);
@@ -437,7 +439,7 @@ export default function MyKitchenToolsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-indigo-700">My Kitchen Tools</h1>
+        <h1 className="text-3xl font-bold text-indigo-700">{t('myKitchenTools.title')}</h1>
         <div className="flex items-center gap-4">
           {user && (
             <div className="flex items-center gap-2">
@@ -452,7 +454,7 @@ export default function MyKitchenToolsPage() {
             </div>
           )}
           <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
-            Back to Homepage
+            {t('common.backToHome') || 'Back to Homepage'}
           </a>
         </div>
       </div>
@@ -491,10 +493,10 @@ export default function MyKitchenToolsPage() {
                 onClick={handleAddTool}
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
               >
-                Add New Tool
+                {t('myKitchenTools.addTools')}
               </button>
               <label className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors cursor-pointer">
-                Upload Photos
+                {t('myKitchenTools.uploadPhotos')}
                 <input
                   type="file"
                   accept="image/*"
@@ -508,7 +510,7 @@ export default function MyKitchenToolsPage() {
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
                 title="Delete all kitchen tools"
               >
-                Delete All
+                {t('myKitchenTools.deleteAll')}
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-right">
@@ -536,7 +538,7 @@ export default function MyKitchenToolsPage() {
 
       {/* Kitchen Tools List */}
       <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4 text-indigo-700">Your Kitchen Tools</h2>
+        <h2 className="text-xl font-semibold mb-4 text-indigo-700">{t('myKitchenTools.title')}</h2>
         
         {isLoading ? (
           <div className="text-center py-8">
@@ -544,11 +546,11 @@ export default function MyKitchenToolsPage() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p className="mt-2 text-gray-600">Loading your kitchen tools...</p>
+            <p className="mt-2 text-gray-600">{t('common.loading') || 'Loading your kitchen tools...'}</p>
           </div>
         ) : filteredTools.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No kitchen tools found. Add some tools to get started!</p>
+            <p className="text-gray-600">{t('myKitchenTools.noTools')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -580,8 +582,8 @@ export default function MyKitchenToolsPage() {
                 )}
                 
                 <div className="mt-2 text-sm text-gray-600">
-                  <p>Category: <span className="font-medium">{categories.find(c => c.id === tool.category)?.name || tool.category}</span></p>
-                  <p>Condition: <span className="font-medium">{conditions.find(c => c.id === tool.condition)?.name || tool.condition}</span></p>
+                  <p>{t('myKitchenTools.category')}: <span className="font-medium">{categories.find(c => c.id === tool.category)?.name || tool.category}</span></p>
+                  <p>{t('myKitchenTools.condition')}: <span className="font-medium">{conditions.find(c => c.id === tool.condition)?.name || tool.condition}</span></p>
                   {tool.lastMaintenanceDate && (
                     <p>Last Maintenance: <span className="font-medium">{new Date(tool.lastMaintenanceDate).toLocaleDateString()}</span></p>
                   )}
@@ -595,13 +597,13 @@ export default function MyKitchenToolsPage() {
                     onClick={() => handleEditTool(tool)}
                     className="text-indigo-600 hover:text-indigo-800"
                   >
-                    Edit
+                    {t('common.edit') || 'Edit'}
                   </button>
                   <button
                     onClick={() => handleDeleteTool(tool.id)}
                     className="text-red-600 hover:text-red-800"
                   >
-                    Delete
+                    {t('common.delete') || 'Delete'}
                   </button>
                 </div>
               </div>

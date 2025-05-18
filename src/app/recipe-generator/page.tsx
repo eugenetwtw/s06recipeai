@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import { useI18n } from '@/i18n/I18nContext';
 // Kitchen tool mapping import removed as per user request
 
 type DietaryPreferences = {
@@ -15,6 +16,7 @@ type DietaryPreferences = {
 
 export default function RecipeGeneratorPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [newIngredient, setNewIngredient] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -110,7 +112,7 @@ export default function RecipeGeneratorPage() {
     }
 
     if (ingredients.length === 0) {
-      alert('Please add at least one ingredient');
+      alert(t('recipeGenerator.addIngredientAlert'));
       return;
     }
 
@@ -180,7 +182,7 @@ export default function RecipeGeneratorPage() {
     return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Recipe Generator</h1>
+        <h1 className="text-3xl font-bold">{t('recipeGenerator.title')}</h1>
         <div className="flex items-center gap-4">
           {!isAuthenticated ? (
             <button
@@ -190,7 +192,7 @@ export default function RecipeGeneratorPage() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
-              Login
+              {t('common.signIn')}
             </button>
           ) : (
             <div className="flex items-center gap-2">
@@ -206,7 +208,7 @@ export default function RecipeGeneratorPage() {
             </div>
           )}
           <a href="/" className="bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-600 transition-colors duration-200 text-sm">
-            Back to Homepage
+            {t('common.backToHomepage')}
           </a>
         </div>
       </div>
@@ -214,7 +216,7 @@ export default function RecipeGeneratorPage() {
       <div className="grid md:grid-cols-2 gap-8">
         {/* Ingredients Input Section */}
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Add Ingredients</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('recipeGenerator.addIngredients')}</h2>
           
                   {/* Kitchen tool selection removed as per user request */}
           
@@ -223,7 +225,7 @@ export default function RecipeGeneratorPage() {
           {suggestedMealRecipes.length > 0 && (
             <div className="mb-4 p-3 bg-rose-50 rounded-lg">
               <h3 className="text-md font-medium text-rose-700 mb-2">
-                Inspired by your favorite meals:
+                {t('recipeGenerator.inspiredByFavorites')}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {suggestedMealRecipes.slice(0, 12).map((dish, index) => (
@@ -240,7 +242,7 @@ export default function RecipeGeneratorPage() {
                 ))}
               </div>
               <p className="text-xs text-rose-600 mt-2">
-                Click on a dish to add it as an ingredient
+                {t('recipeGenerator.clickToAdd')}
               </p>
             </div>
           )}
@@ -250,7 +252,7 @@ export default function RecipeGeneratorPage() {
               type="text"
               value={newIngredient}
               onChange={(e) => setNewIngredient(e.target.value)}
-              placeholder="Enter an ingredient"
+              placeholder={t('recipeGenerator.enterIngredient')}
               className="flex-grow mr-2 p-2 border rounded"
               onKeyDown={(e) => e.key === 'Enter' && addIngredient()}
             />
@@ -258,7 +260,7 @@ export default function RecipeGeneratorPage() {
               onClick={addIngredient}
               className="bg-blue-500 text-white px-4 py-2 rounded"
             >
-              Add
+              {t('recipeGenerator.add')}
             </button>
           </div>
 
@@ -284,26 +286,26 @@ export default function RecipeGeneratorPage() {
             disabled={isLoading}
             className="bg-green-500 text-white px-4 py-2 rounded mt-4 w-full"
           >
-            {isLoading ? 'Generating...' : 'Generate Recipe'}
+            {isLoading ? t('recipeGenerator.generating') : t('recipeGenerator.generateRecipe')}
           </button>
         </div>
 
         {/* Recipe Display Section */}
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Generated Recipe</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('recipeGenerator.generatedRecipe')}</h2>
           
           {isLoading ? (
             <div className="text-center text-blue-500">
-              Cooking up something delicious...
+              {t('recipeGenerator.cooking')}
             </div>
           ) : generatedRecipe ? (
             <div>
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-semibold text-indigo-700">Recipe Details:</h3>
+                <h3 className="text-lg font-semibold text-indigo-700">{t('recipeGenerator.recipeDetails')}</h3>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(generatedRecipe);
-                    alert('Recipe copied to clipboard!');
+                    alert(t('recipeGenerator.recipeCopied'));
                   }}
                   className="text-gray-500 hover:text-indigo-600 transition-colors"
                   title="Copy to clipboard"
@@ -319,7 +321,7 @@ export default function RecipeGeneratorPage() {
             </div>
           ) : (
             <div className="text-gray-500 text-center">
-              Your recipe will appear here
+              {t('recipeGenerator.recipeWillAppear')}
             </div>
           )}
         </div>
