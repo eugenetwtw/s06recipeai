@@ -66,15 +66,16 @@ export class OpenAIService {
   public static async generateRecipe(ingredients: string[], context: string) {
     const openai = this.getInstance();
     
-    // Parse the context to extract kitchen tools
+    // Parse the context to extract kitchen tools and meal history
     let contextObj;
     try {
       contextObj = JSON.parse(context);
     } catch (error) {
-      contextObj = { cookingTools: [] };
+      contextObj = { cookingTools: [], mealHistoryPreferences: { favoriteMeals: [], favoriteCuisines: [] } };
     }
     
     const cookingTools = contextObj.cookingTools || [];
+    const mealHistoryPreferences = contextObj.mealHistoryPreferences || { favoriteMeals: [], favoriteCuisines: [] };
 
     try {
       const response = await openai.chat.completions.create({
@@ -94,6 +95,20 @@ export class OpenAIService {
                       For example, if an oven is available, you can suggest baking a pizza. If no oven
                       is available, avoid recipes that require baking.
                       
+                      ${mealHistoryPreferences.favoriteMeals.length > 0 ? `
+                      User's favorite meals:
+                      ${mealHistoryPreferences.favoriteMeals.slice(0, 5).map((meal: any) => 
+                        `- ${meal.name} (${meal.restaurant}, ${meal.cuisine}): ${meal.dishes.join(', ')}`
+                      ).join('\n')}
+                      ` : ''}
+                      
+                      ${mealHistoryPreferences.favoriteCuisines.length > 0 ? `
+                      User's favorite cuisines: ${mealHistoryPreferences.favoriteCuisines.join(', ')}
+                      ` : ''}
+                      
+                      IMPORTANT: Consider the user's favorite meals and cuisines when creating the recipe.
+                      If possible, incorporate elements from their preferred cuisines or dishes they enjoy.
+                      
                       Additional context: ${context}. 
                       
                       Please provide:
@@ -102,7 +117,8 @@ export class OpenAIService {
                       - Step-by-step instructions (using only available tools)
                       - Estimated cooking time
                       - Difficulty level
-                      - Explanation of how this recipe is suitable for the available kitchen tools`
+                      - Explanation of how this recipe is suitable for the available kitchen tools
+                      - Brief note on how this recipe relates to the user's meal preferences (if applicable)`
           }
         ],
         max_tokens: 800,

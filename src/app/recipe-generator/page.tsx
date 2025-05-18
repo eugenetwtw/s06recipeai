@@ -24,6 +24,9 @@ export default function RecipeGeneratorPage() {
   const [cookingTools, setCookingTools] = useState<string[]>([]);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [suggestedRecipes, setSuggestedRecipes] = useState<string[]>([]);
+  const [mealHistory, setMealHistory] = useState<any[]>([]);
+  const [favoriteMeals, setFavoriteMeals] = useState<any[]>([]);
+  const [suggestedMealRecipes, setSuggestedMealRecipes] = useState<string[]>([]);
 
   useEffect(() => {
     checkAuthStatus();
@@ -32,6 +35,7 @@ export default function RecipeGeneratorPage() {
   useEffect(() => {
     if (user) {
       fetchUserKitchenTools();
+      fetchUserMealHistory();
     }
   }, [user]);
 
@@ -82,6 +86,44 @@ export default function RecipeGeneratorPage() {
     }
   };
 
+  const fetchUserMealHistory = async () => {
+    try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+      
+      // Fetch meal history from the API
+      const response = await fetch('/api/user/meal-history', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch meal history');
+      }
+      
+      const meals = await response.json();
+      setMealHistory(meals);
+      
+      // Extract favorite meals
+      const favorites = meals.filter((meal: any) => meal.isFavorite);
+      setFavoriteMeals(favorites);
+      
+      // Extract dish names from favorite meals to suggest recipes
+      const dishNames = favorites.flatMap((meal: any) => meal.dishes || []);
+      const uniqueDishNames = dishNames.filter((dish: string, index: number) => 
+        dishNames.indexOf(dish) === index
+      );
+      setSuggestedMealRecipes(uniqueDishNames);
+    } catch (error) {
+      console.error('Error fetching meal history:', error);
+    }
+  };
+
   const addIngredient = () => {
     if (newIngredient.trim() && !ingredients.includes(newIngredient.trim())) {
       setIngredients(prev => [...prev, newIngredient.trim()]);
@@ -129,6 +171,17 @@ export default function RecipeGeneratorPage() {
         ? [selectedTool] 
         : cookingTools;
 
+      // Prepare meal history preferences
+      const mealHistoryPreferences = {
+        favoriteMeals: favoriteMeals.map(meal => ({
+          name: meal.name,
+          restaurant: meal.restaurant,
+          cuisine: meal.cuisine,
+          dishes: meal.dishes
+        })),
+        favoriteCuisines: Array.from(new Set(favoriteMeals.map(meal => meal.cuisine))).filter(Boolean)
+      };
+
       const response = await fetch('/api/generate-recipe', {
         method: 'POST',
         headers: {
@@ -140,7 +193,8 @@ export default function RecipeGeneratorPage() {
           refrigeratorContents: [],
           cookingTools: toolsToInclude,
           dietaryPreferences,
-          prioritizeTool: selectedTool
+          prioritizeTool: selectedTool,
+          mealHistoryPreferences
         })
       });
 
@@ -242,6 +296,31 @@ export default function RecipeGeneratorPage() {
               </div>
               <p className="text-xs text-indigo-600 mt-2">
                 Click on a recipe to add it as an ingredient
+              </p>
+            </div>
+          )}
+          
+          {suggestedMealRecipes.length > 0 && (
+            <div className="mb-4 p-3 bg-rose-50 rounded-lg">
+              <h3 className="text-md font-medium text-rose-700 mb-2">
+                Inspired by your favorite meals:
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {suggestedMealRecipes.slice(0, 12).map((dish, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setNewIngredient(dish);
+                      addIngredient();
+                    }}
+                    className="bg-rose-100 text-rose-800 px-3 py-1 rounded-full hover:bg-rose-200 text-sm"
+                  >
+                    {dish}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-rose-600 mt-2">
+                Click on a dish to add it as an ingredient
               </p>
             </div>
           )}

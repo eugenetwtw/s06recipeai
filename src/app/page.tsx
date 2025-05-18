@@ -24,20 +24,6 @@ export default function Home() {
   const [kitchenToolsData, setKitchenToolsData] = useState<any[]>([]);
   const [mealHistoryData, setMealHistoryData] = useState<any[]>([]);
   const [recipeHistoryData, setRecipeHistoryData] = useState<any[]>([]);
-  // userPreferences: 全面支援物件型態
-  const [userPreferences, setUserPreferences] = useState<any>({
-    vegetarian: false,
-    vegan: false,
-    gluten_free: false,
-    dairy_free: false,
-    exclude_ingredients: [],
-    favorite_cuisines: [],
-    spiciness_preference: 5,
-    notes: ''
-  });
-  const [newExcludeIngredient, setNewExcludeIngredient] = useState('');
-  const [newFavoriteCuisine, setNewFavoriteCuisine] = useState('');
-  const [preferencesChanged, setPreferencesChanged] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -72,13 +58,12 @@ export default function Home() {
   }, [processingKitchenToolsText]);
 
   useEffect(() => {
-    // Fetch current session and user preferences
+    // Fetch current session
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
-        fetchUserPreferences(session.user.id);
       }
     };
     getSession();
@@ -88,7 +73,6 @@ export default function Home() {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserData(session.user.id);
-        fetchUserPreferences(session.user.id);
       } else {
         setRefrigeratorData([]);
         setKitchenToolsData([]);
@@ -157,58 +141,10 @@ export default function Home() {
     }
   };
 
-  const fetchUserPreferences = async (userId: string) => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (!accessToken) return;
-      const res = await fetch('/api/user/preferences', {
-         headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const data = await res.json();
-      // 直接設為物件
-      setUserPreferences({
-        vegetarian: !!data.vegetarian,
-        vegan: !!data.vegan,
-        gluten_free: !!data.gluten_free,
-        dairy_free: !!data.dairy_free,
-        exclude_ingredients: Array.isArray(data.exclude_ingredients) ? data.exclude_ingredients : [],
-        favorite_cuisines: Array.isArray(data.favorite_cuisines) ? data.favorite_cuisines : [],
-        spiciness_preference: typeof data.spiciness_preference === 'number' ? data.spiciness_preference : 5,
-        notes: data.notes || ''
-      });
-      setPreferencesChanged(false);
-    } catch (error) {
-      console.error('Error fetching user preferences:', error);
-    }
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     window.location.reload();
-  };
-
-  const handleSavePreferences = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      if (!accessToken) return;
-      const res = await fetch('/api/user/preferences', {
-         method: 'POST',
-         headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`
-         },
-         body: JSON.stringify(userPreferences)
-      });
-      const result = await res.json();
-      setPreferencesChanged(false);
-      fetchUserPreferences(user?.id);
-      console.log('Saved preferences:', result);
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-    }
   };
 
   const [isUploading, setIsUploading] = useState(false);
@@ -339,44 +275,6 @@ export default function Home() {
     } catch (error) {
       console.error('Recipe generation failed', error);
     }
-  };
-  
-  // Exclude Ingredients
-  const handleAddExcludeIngredient = () => {
-    if (newExcludeIngredient.trim() !== "") {
-      setUserPreferences((prev: any) => ({
-        ...prev,
-        exclude_ingredients: [...prev.exclude_ingredients, newExcludeIngredient.trim()]
-      }));
-      setNewExcludeIngredient("");
-      setPreferencesChanged(true);
-    }
-  };
-  const handleDeleteExcludeIngredient = (index: number) => {
-    setUserPreferences((prev: any) => ({
-      ...prev,
-      exclude_ingredients: prev.exclude_ingredients.filter((_: any, i: number) => i !== index)
-    }));
-    setPreferencesChanged(true);
-  };
-
-  // Favorite Cuisines
-  const handleAddFavoriteCuisine = () => {
-    if (newFavoriteCuisine.trim() !== "") {
-      setUserPreferences((prev: any) => ({
-        ...prev,
-        favorite_cuisines: [...prev.favorite_cuisines, newFavoriteCuisine.trim()]
-      }));
-      setNewFavoriteCuisine("");
-      setPreferencesChanged(true);
-    }
-  };
-  const handleDeleteFavoriteCuisine = (index: number) => {
-    setUserPreferences((prev: any) => ({
-      ...prev,
-      favorite_cuisines: prev.favorite_cuisines.filter((_: any, i: number) => i !== index)
-    }));
-    setPreferencesChanged(true);
   };
   
   return (
@@ -577,160 +475,7 @@ export default function Home() {
         {user && (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Dietary Preferences</h2>
-              <div className="mb-4">
-                <div className="flex flex-wrap gap-4 mb-2">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={userPreferences.vegetarian}
-                      onChange={e => {
-                        setUserPreferences((prev: any) => ({ ...prev, vegetarian: e.target.checked }));
-                        setPreferencesChanged(true);
-                      }}
-                    /> Vegetarian
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={userPreferences.vegan}
-                      onChange={e => {
-                        setUserPreferences((prev: any) => ({ ...prev, vegan: e.target.checked }));
-                        setPreferencesChanged(true);
-                      }}
-                    /> Vegan
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={userPreferences.gluten_free}
-                      onChange={e => {
-                        setUserPreferences((prev: any) => ({ ...prev, gluten_free: e.target.checked }));
-                        setPreferencesChanged(true);
-                      }}
-                    /> Gluten-Free
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={userPreferences.dairy_free}
-                      onChange={e => {
-                        setUserPreferences((prev: any) => ({ ...prev, dairy_free: e.target.checked }));
-                        setPreferencesChanged(true);
-                      }}
-                    /> Dairy-Free
-                  </label>
-                </div>
-                <div className="mb-2">
-                  <label className="font-medium">Exclude Ingredients:</label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {userPreferences.exclude_ingredients.map((item: string, idx: number) => (
-                      <span key={idx} className="inline-flex items-center bg-red-100 text-red-700 px-2 py-1 rounded mr-2 mb-1">
-                        {item}
-                        <button
-                          className="ml-1 text-red-500 font-bold"
-                          onClick={() => handleDeleteExcludeIngredient(idx)}
-                          aria-label="Remove"
-                        >-</button>
-                      </span>
-                    ))}
-                    <input
-                      type="text"
-                      value={newExcludeIngredient}
-                      onChange={e => setNewExcludeIngredient(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddExcludeIngredient();
-                        }
-                      }}
-                      className="input-primary w-32"
-                      placeholder="Add ingredient"
-                    />
-                    <button
-                      className="btn-primary px-2 py-1"
-                      onClick={handleAddExcludeIngredient}
-                      aria-label="Add"
-                    >+</button>
-                  </div>
-                </div>
-                <div className="mb-2">
-                  <label className="font-medium">Favorite Cuisines:</label>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {userPreferences.favorite_cuisines.map((item: string, idx: number) => (
-                      <span key={idx} className="inline-flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2 mb-1">
-                        {item}
-                        <button
-                          className="ml-1 text-blue-500 font-bold"
-                          onClick={() => handleDeleteFavoriteCuisine(idx)}
-                          aria-label="Remove"
-                        >-</button>
-                      </span>
-                    ))}
-                    <input
-                      type="text"
-                      value={newFavoriteCuisine}
-                      onChange={e => setNewFavoriteCuisine(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddFavoriteCuisine();
-                        }
-                      }}
-                      className="input-primary w-32"
-                      placeholder="Add cuisine"
-                    />
-                    <button
-                      className="btn-primary px-2 py-1"
-                      onClick={handleAddFavoriteCuisine}
-                      aria-label="Add"
-                    >+</button>
-                  </div>
-                </div>
-                <div className="mb-2">
-                  <label className="font-medium">Spiciness Preference: </label>
-                  <input
-                    type="range"
-                    min={0}
-                    max={10}
-                    value={userPreferences.spiciness_preference}
-                    onChange={e => {
-                      setUserPreferences((prev: any) => ({
-                        ...prev,
-                        spiciness_preference: Number(e.target.value)
-                      }));
-                      setPreferencesChanged(true);
-                    }}
-                    className="w-32 align-middle"
-                  />
-                  <span className="ml-2">{userPreferences.spiciness_preference}</span>
-                </div>
-                <div className="mb-2">
-                  <label className="font-medium">Notes:</label>
-                  <textarea
-                    value={userPreferences.notes}
-                    onChange={e => {
-                      setUserPreferences((prev: any) => ({
-                        ...prev,
-                        notes: e.target.value
-                      }));
-                      setPreferencesChanged(true);
-                    }}
-                    className="input-primary w-full h-16"
-                    placeholder="Other dietary notes..."
-                  />
-                </div>
-                <button
-                  className={`btn-primary w-full mt-2 ${!preferencesChanged ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={handleSavePreferences}
-                  disabled={!preferencesChanged}
-                >
-                  Save Preferences
-                </button>
-              </div>
-            </div>
-            <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Refrigerator Contents</h2>
+              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Refrigerator Contents or ingredients by hand</h2>
               {refrigeratorData.length > 0 ? (
                 <ul className="space-y-2">
                   {refrigeratorData.map((item, index) => (
@@ -776,7 +521,18 @@ export default function Home() {
             </div>
 
             <div className="card">
-              <h2 className="text-2xl font-bold mb-6 text-indigo-700">Your Meal History</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-indigo-700">Your Meal History</h2>
+                <a 
+                  href="/my-meal-history" 
+                  className="btn-secondary text-sm px-3 py-1 flex items-center gap-1"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Manage Meals
+                </a>
+              </div>
               {mealHistoryData.length > 0 ? (
                 <ul className="space-y-4">
                   {mealHistoryData.map((item, index) => (
@@ -829,7 +585,10 @@ export default function Home() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-600">No meal history data uploaded yet.</p>
+                <div className="text-center py-4">
+                  <p className="text-gray-600 mb-3">No meal history data uploaded yet.</p>
+                  <a href="/my-meal-history" className="btn-primary text-sm">Add Meal History</a>
+                </div>
               )}
             </div>
 
