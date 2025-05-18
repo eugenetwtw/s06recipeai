@@ -7,12 +7,19 @@ const supabase = createClient(
 );
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const url = new URL(request.url);
+  const { searchParams } = url;
   const code = searchParams.get('code');
-
+  const accessToken = searchParams.get('access_token');
+  const refreshToken = searchParams.get('refresh_token');
+  
+  // Get the language parameter
+  const lang = searchParams.get('lang') || 'en';
+  
+  // Check if we have a code (authorization code flow) or tokens in the URL (implicit flow)
   if (code) {
     try {
-      // Exchange the code for a session
+      // Authorization code flow - exchange the code for a session
       const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (error) {
         console.error('Error exchanging code for session:', error);
@@ -72,5 +79,11 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ error: 'No authorization code provided' }, { status: 400 });
+  // If we don't have a code but we might have tokens in the URL fragment
+  // We'll redirect to the homepage with the language parameter
+  // The client-side code will handle extracting tokens from the URL fragment
+  const redirectUrl = new URL('/', url.origin);
+  redirectUrl.searchParams.set('lang', lang);
+  
+  return NextResponse.redirect(redirectUrl);
 }
