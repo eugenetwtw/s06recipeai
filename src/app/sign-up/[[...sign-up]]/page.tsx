@@ -1,9 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { useI18n } from '@/i18n/I18nContext';
+import LanguageSelector from '@/components/LanguageSelector';
 
 export default function SignUpPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { t, locale } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -35,10 +41,14 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
+      // Include the current language in the redirect URL
+      const callbackUrl = new URL(`${window.location.origin}/api/auth-callback`);
+      callbackUrl.searchParams.set('lang', locale);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: callbackUrl.toString(),
         },
       });
 
@@ -51,12 +61,15 @@ export default function SignUpPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50">
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
       <div className="bg-white p-8 shadow-lg rounded-xl max-w-md w-full">
-        <h1 className="text-3xl font-bold mb-6 text-indigo-600 text-center">Sign Up for Recipe AI</h1>
+        <h1 className="text-3xl font-bold mb-6 text-indigo-600 text-center">{t('auth.signUp.title')}</h1>
         
         {success ? (
           <div className="text-center p-4 bg-green-100 text-green-800 rounded-lg">
-            <p>Sign up successful! Please check your email for a confirmation link.</p>
+            <p>{t('auth.signUp.successMessage')}</p>
           </div>
         ) : (
           <>
@@ -71,14 +84,14 @@ export default function SignUpPage() {
                 <path d="M11.15 21.77c-2.14-2.01-3.491-5.012-3.491-8.284 0-3.272 1.351-6.274 3.491-8.284l3.572-2.217c-2.14-2.011-5.142-3.362-8.414-3.362-3.169 0-6.05 1.247-8.163 3.279l3.572 2.217c1.663-2.637 4.269-4.541 7.319-5.187-1.879 1.138-3.278 3.087-3.439 5.533 2.138-1.444 3.593-4.05 3.593-6.861 0-.715-.086-1.409-.249-2.067l3.572-2.217c.476 1.056.725 2.206.725 3.406 0 1.199-.249 2.35-.725 3.406h3.572c.077.574.122 1.161.122 1.759 0 6.652-5.554 12.103-12.102 12.103-6.549 0-12.103-5.451-12.103-12.103s5.554-12.103 12.103-12.103c3.272 0 6.274 1.351 8.414 3.362l-3.572 2.217z" fill="#FBBC05"/>
                 <path d="M23.78 14.614v-3.572h-3.572c-.077-.574-.122-1.161-.122-1.759 0-6.652 5.554-12.103 12.102-12.103v3.572-3.572c0 6.652-5.554 12.103-12.102 12.103H23.78z" fill="#EA4335"/>
               </svg>
-              Sign Up with Google
+              {t('auth.signUp.googleSignUp')}
             </button>
 
-            <div className="text-center text-gray-500 my-4">OR</div>
+            <div className="text-center text-gray-500 my-4">{t('auth.signIn.or')}</div>
 
             <form onSubmit={handleSignUp}>
               <div className="mb-4">
-                <label htmlFor="email" className="block text-gray-700 mb-1">Email</label>
+                <label htmlFor="email" className="block text-gray-700 mb-1">{t('auth.signIn.email')}</label>
                 <input
                   id="email"
                   type="email"
@@ -86,11 +99,11 @@ export default function SignUpPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                  placeholder="Enter your email"
+                  placeholder={t('auth.signUp.emailPlaceholder')}
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-700 mb-1">Password</label>
+                <label htmlFor="password" className="block text-gray-700 mb-1">{t('auth.signIn.password')}</label>
                 <input
                   id="password"
                   type="password"
@@ -99,7 +112,7 @@ export default function SignUpPage() {
                   required
                   minLength={6}
                   className="w-full border border-indigo-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
-                  placeholder="Enter your password"
+                  placeholder={t('auth.signUp.passwordPlaceholder')}
                 />
               </div>
               {error && (
@@ -110,18 +123,18 @@ export default function SignUpPage() {
                 disabled={loading}
                 className="bg-indigo-500 text-white px-6 py-3 rounded-lg w-full hover:bg-indigo-600 transition-colors duration-200"
               >
-                {loading ? 'Signing Up...' : 'Sign Up with Email'}
+                {loading ? t('auth.signUp.signingUp') : t('auth.signUp.emailSignUp')}
               </button>
             </form>
           </>
         )}
         
         <div className="text-center mt-6">
-          <a href="/" className="text-indigo-500 hover:underline">Return to Home</a>
+          <a href="/" className="text-indigo-500 hover:underline">{t('auth.signUp.returnHome')}</a>
         </div>
         {success && (
           <div className="text-center mt-4">
-            <a href="/sign-in" className="text-indigo-500 hover:underline">Go to Sign In</a>
+            <a href="/sign-in" className="text-indigo-500 hover:underline">{t('auth.signUp.goToSignIn')}</a>
           </div>
         )}
       </div>

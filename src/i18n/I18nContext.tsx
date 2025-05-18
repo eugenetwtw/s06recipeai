@@ -85,12 +85,18 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
   
   // Update URL when locale changes
   useEffect(() => {
+    // Skip URL update during authentication flow
+    if (pathname.includes('/api/auth-callback')) {
+      return;
+    }
+    
     const newParams = new URLSearchParams(searchParams.toString());
     newParams.set('lang', locale);
     
     // Update URL without refreshing the page
+    // Use replaceState instead of pushState to avoid history issues
     const newUrl = `${pathname}?${newParams.toString()}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
+    window.history.replaceState({ path: newUrl }, '', newUrl);
     
     // Also update the HTML lang attribute
     if (typeof document !== 'undefined') {

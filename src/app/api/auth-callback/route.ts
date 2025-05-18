@@ -37,20 +37,30 @@ export async function GET(request: Request) {
       // Get the origin from the request to support both local development and production
       const requestUrl = new URL(request.url);
       const origin = requestUrl.origin;
-      const response = NextResponse.redirect(new URL('/', origin));
+      
+      // Preserve the language parameter if it exists in the request
+      const lang = requestUrl.searchParams.get('lang') || 'en';
+      const redirectUrl = new URL('/', origin);
+      redirectUrl.searchParams.set('lang', lang);
+      
+      const response = NextResponse.redirect(redirectUrl);
       
       // Set access and refresh tokens as cookies
       if (data.session) {
+        // Determine if the request is HTTPS
+        const isSecure = origin.startsWith('https://');
         response.cookies.set('sb-access-token', data.session.access_token, {
           httpOnly: true,
-          secure: true,
+          secure: isSecure,
           sameSite: 'strict',
+          path: '/',
           maxAge: 60 * 60 * 24 * 7 // 1 week
         });
         response.cookies.set('sb-refresh-token', data.session.refresh_token, {
           httpOnly: true,
-          secure: true,
+          secure: isSecure,
           sameSite: 'strict',
+          path: '/',
           maxAge: 60 * 60 * 24 * 7 // 1 week
         });
       }

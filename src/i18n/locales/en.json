@@ -134,10 +134,23 @@
       "or": "OR",
       "email": "Email",
       "password": "Password",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password",
       "emailSignIn": "Sign In with Email",
       "signingIn": "Signing In...",
       "noAccount": "Don't have an account? Sign Up",
       "demoAccountNote": "Demo Account: All changes will be reset on logout"
+    },
+    "signUp": {
+      "title": "Sign Up for Recipe AI",
+      "googleSignUp": "Sign Up with Google",
+      "emailPlaceholder": "Enter your email",
+      "passwordPlaceholder": "Enter your password",
+      "emailSignUp": "Sign Up with Email",
+      "signingUp": "Signing Up...",
+      "successMessage": "Sign up successful! Please check your email for a confirmation link.",
+      "returnHome": "Return to Home",
+      "goToSignIn": "Go to Sign In"
     }
   },
   "recipeGenerator": {

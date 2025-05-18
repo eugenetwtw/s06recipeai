@@ -50,10 +50,14 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
+      // Include the current language in the redirect URL
+      const callbackUrl = new URL(`${window.location.origin}/api/auth-callback`);
+      callbackUrl.searchParams.set('lang', locale);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: callbackUrl.toString(),
         },
       });
 

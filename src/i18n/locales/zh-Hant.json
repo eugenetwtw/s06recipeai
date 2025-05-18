@@ -142,6 +142,17 @@
       "demoAccountNote": "示範帳戶：所有更改將在登出時重置",
       "emailPlaceholder": "輸入您的電子郵件",
       "passwordPlaceholder": "輸入您的密碼"
+    },
+    "signUp": {
+      "title": "註冊食譜AI",
+      "googleSignUp": "使用Google註冊",
+      "emailPlaceholder": "輸入您的電子郵件",
+      "passwordPlaceholder": "輸入您的密碼",
+      "emailSignUp": "使用電子郵件註冊",
+      "signingUp": "註冊中...",
+      "successMessage": "註冊成功！請檢查您的電子郵件以獲取確認連結。",
+      "returnHome": "返回首頁",
+      "goToSignIn": "前往登入"
     }
   },
   "recipeGenerator": {

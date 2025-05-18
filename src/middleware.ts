@@ -11,12 +11,13 @@ export function middleware(request: NextRequest) {
   // Check if the URL already has a language parameter
   const langParam = request.nextUrl.searchParams.get('lang');
   
-  // Skip language detection for API routes and static assets
+  // Skip language detection for API routes, static assets, and auth callback
   const isApiRoute = pathname.startsWith('/api/');
   const isStaticAsset = /\.(jpg|jpeg|png|gif|svg|ico|css|js)$/i.test(pathname);
+  const isAuthCallback = pathname.startsWith('/api/auth-callback');
   
-  // If no language parameter is present and it's not an API route or static asset, detect the language and redirect
-  if (!langParam && !isApiRoute && !isStaticAsset) {
+  // If no language parameter is present and it's not an API route, auth callback, or static asset, detect the language and redirect
+  if (!langParam && !isApiRoute && !isStaticAsset && !isAuthCallback) {
     // Get the preferred language from the Accept-Language header
     const acceptLanguage = request.headers.get('accept-language') || '';
     
@@ -46,6 +47,7 @@ export function middleware(request: NextRequest) {
     
     // Create a new URL with the detected language
     const newUrl = new URL(request.nextUrl);
+    newUrl.pathname = '/'; // Always redirect to root
     newUrl.searchParams.set('lang', detectedLocale);
     
     // Redirect to the new URL with the language parameter
