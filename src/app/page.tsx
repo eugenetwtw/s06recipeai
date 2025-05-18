@@ -587,7 +587,9 @@ export default function Home() {
                         </svg>
                         Generating Recipe...
                       </span>
-                    ) : 'Generate Recipe with These Ingredients'}
+                    ) : (
+                      generatedRecipe ? 'Generate Recipe Again!' : 'Generate Recipe with These Ingredients'
+                    )}
                   </button>
                   
                   {generatedRecipe && (
