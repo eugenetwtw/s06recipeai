@@ -294,9 +294,9 @@ export default function Home() {
   };
   
   return (
-    <main className="min-h-screen flex flex-col justify-center items-center p-6 md:p-12 bg-gradient-to-b from-blue-50 to-white">
-      <div className="container max-w-5xl mx-auto">
-        <header className="flex justify-between items-center mb-16">
+    <main className="min-h-screen flex flex-col items-center p-6 md:p-12 bg-gradient-to-b from-blue-50 to-white">
+      <div className="container max-w-6xl mx-auto">
+        <header className="flex justify-between items-center mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-600 tracking-tight">Recipe AI</h1>
           {user ? (
             <div className="flex items-center space-x-4">
@@ -322,9 +322,149 @@ export default function Home() {
             </div>
           )}
         </header>
+
+        {/* Hero Section */}
+        <div className="text-center mb-16 py-12">
+          <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">Transform Your Kitchen <span className="text-indigo-600">Into a Culinary Studio</span></h2>
+          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8">
+            Recipe AI turns your ingredients into delicious recipes tailored to your taste preferences and kitchen tools.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/sign-up" className="bg-indigo-600 text-white rounded-full px-8 py-4 text-lg font-medium shadow-md hover:bg-indigo-700 transition-colors">Get Started Free</a>
+            <a href="#how-it-works" className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-8 py-4 text-lg font-medium shadow-sm hover:bg-indigo-50 transition-colors">
+              How It Works
+            </a>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center">
+            <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Snap & Cook</h3>
+            <p className="text-gray-600">
+              Simply take a photo of your ingredients and let our AI suggest personalized recipes in seconds.
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center">
+            <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Smart Recommendations</h3>
+            <p className="text-gray-600">
+              Our AI learns your taste preferences and suggests recipes you'll love based on your meal history.
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center">
+            <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Personalized Experience</h3>
+            <p className="text-gray-600">
+              Track your kitchen tools and meal history to get increasingly personalized recipe suggestions.
+            </p>
+          </div>
+        </div>
+
+        {/* How It Works Section */}
+        <div id="how-it-works" className="mb-16">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">How Recipe AI Works</h2>
+          
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">1</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Upload Photos</h3>
+              <p className="text-gray-600 text-sm">
+                Take photos of your ingredients or refrigerator contents
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">2</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">AI Analysis</h3>
+              <p className="text-gray-600 text-sm">
+                Our AI identifies ingredients and considers your preferences
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">3</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Recipe Generation</h3>
+              <p className="text-gray-600 text-sm">
+                Get personalized recipes based on your ingredients and taste
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-indigo-600">4</div>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">Cook & Enjoy</h3>
+              <p className="text-gray-600 text-sm">
+                Follow the recipe and enjoy your delicious meal
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">What Our Users Say</h2>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">J</div>
+                <div>
+                  <h4 className="font-bold text-gray-800">Jessica T.</h4>
+                  <p className="text-gray-500 text-sm">Home Cook</p>
+                </div>
+              </div>
+              <p className="text-gray-600 italic">
+                "Recipe AI has transformed how I cook. I no longer waste food because I can create delicious meals with whatever I have in my fridge!"
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">M</div>
+                <div>
+                  <h4 className="font-bold text-gray-800">Michael R.</h4>
+                  <p className="text-gray-500 text-sm">Busy Professional</p>
+                </div>
+              </div>
+              <p className="text-gray-600 italic">
+                "As someone who's always short on time, Recipe AI helps me quickly decide what to cook without endless browsing through recipe sites."
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl mr-4">S</div>
+                <div>
+                  <h4 className="font-bold text-gray-800">Sarah K.</h4>
+                  <p className="text-gray-500 text-sm">Food Enthusiast</p>
+                </div>
+              </div>
+              <p className="text-gray-600 italic">
+                "The personalized recommendations are spot on! Recipe AI seems to understand my taste preferences better than I do sometimes."
+              </p>
+            </div>
+          </div>
+        </div>
         
+        {/* Try It Now Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-12 transition-all hover:shadow-md">
-          <h2 className="text-2xl font-bold mb-8 text-indigo-700">Create your perfect recipe</h2>
+          <h2 className="text-2xl font-bold mb-8 text-indigo-700">Try Recipe AI Now</h2>
           
           <div className="flex flex-col md:flex-row gap-6 mb-8">
             <div className="flex-1">
