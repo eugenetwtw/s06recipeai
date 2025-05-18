@@ -4,9 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import ReactMarkdown from 'react-markdown';
+import { useI18n } from '@/i18n/I18nContext';
+import LanguageSelector from '@/components/LanguageSelector';
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useI18n();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [user, setUser] = useState<any>(null);
   const [favoriteMeals, setFavoriteMeals] = useState<any[]>([]);
@@ -328,37 +331,41 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center p-6 md:p-12 bg-gradient-to-b from-blue-50 to-white">
       <div className="container max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-600 tracking-tight">Recipe AI</h1>
-          {user ? (
-            <div className="flex items-center space-x-4">
-              {user.user_metadata?.avatar_url && (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="avatar"
-                  className="w-10 h-10 rounded-full border-2 border-indigo-300 shadow-sm"
-                />
-              )}
-              <div className="flex flex-col items-end">
-                <span className="text-gray-700 font-medium hidden md:inline">{user.email}</span>
-                {user.email === 'demo@demo.com' && (
-                  <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full font-medium">
-                    Demo Mode
-                  </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-600 tracking-tight">{t('common.appName')}</h1>
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                {user.user_metadata?.avatar_url && (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="avatar"
+                    className="w-10 h-10 rounded-full border-2 border-indigo-300 shadow-sm"
+                  />
                 )}
+                <div className="flex flex-col items-end">
+                  <span className="text-gray-700 font-medium hidden md:inline">{user.email}</span>
+                  {(user.email === 'demo@demo.com' || user.email === 'demo-zh-Hant@demo.com') && (
+                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full font-medium">
+                      {t('common.demoMode')}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors"
+                >
+                  {t('common.signOut')}
+                </button>
+                <LanguageSelector />
               </div>
-              <button
-                onClick={handleSignOut}
-                className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
-          ) : (
-            <div className="flex space-x-3">
-              <a href="/sign-in" className="bg-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">Sign In</a>
-              <a href="/sign-up" className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors">Sign Up</a>
-            </div>
-          )}
+            ) : (
+              <div className="flex space-x-3">
+                <a href={`/sign-in?lang=${useI18n().locale}`} className="bg-indigo-600 text-white rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-700 transition-colors">{t('common.signIn')}</a>
+                <a href={`/sign-up?lang=${useI18n().locale}`} className="bg-white text-indigo-600 border border-indigo-200 rounded-full px-5 py-2 text-sm font-medium shadow-sm hover:bg-indigo-50 transition-colors">{t('common.signUp')}</a>
+                <LanguageSelector />
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Marketing sections - only shown to users who are not signed in */}

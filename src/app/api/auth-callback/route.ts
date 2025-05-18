@@ -19,6 +19,20 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
       }
 
+      // Check if this is a demo account login and reset the demo data if needed
+      if (data.session && data.session.user) {
+        const userEmail = data.session.user.email;
+        
+        // Reset demo account data
+        if (userEmail === 'demo@demo.com') {
+          // Reset English demo user data
+          await supabase.rpc('reset_demo_user_data');
+        } else if (userEmail === 'demo-zh-Hant@demo.com') {
+          // Reset Traditional Chinese demo user data
+          await supabase.rpc('reset_zh_hant_demo_user_data');
+        }
+      }
+
       // Set session cookies manually before redirecting
       const response = NextResponse.redirect(new URL('https://s06recipeai.vercel.app'));
       

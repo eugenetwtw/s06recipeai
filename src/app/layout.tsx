@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { I18nProvider } from '@/i18n/I18nContext'
+import { headers } from 'next/headers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,9 +16,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Get the accept-language header to determine the initial language
+  const headersList = headers();
+  const acceptLanguage = headersList.get('accept-language') || '';
+  const initialLang = acceptLanguage.includes('zh') ? 'zh-Hant' : 'en';
+  
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang={initialLang}>
+      <body className={inter.className}>
+        <I18nProvider>
+          {children}
+        </I18nProvider>
+      </body>
     </html>
   )
 }

@@ -1,0 +1,232 @@
+{
+  "common": {
+    "appName": "Recipe AI",
+    "tagline": "Personalized Recipe Generation Platform",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "demoMode": "Demo Mode",
+    "language": "Language"
+  },
+  "home": {
+    "hero": {
+      "title": "Transform Your Kitchen Into a Culinary Studio",
+      "subtitle": "Recipe AI uses advanced computer vision to analyze photos of your refrigerator or ingredients, instantly creating personalized recipes you'll love.",
+      "description": "Upload your food delivery history, and our AI will design healthier, homemade versions of your favorite restaurant meals. In a world where quality delivery food is often too expensive and budget options lack nutrition, Recipe AI helps you cook delicious, nutritious meals at home.",
+      "getStarted": "Get Started Free",
+      "howItWorks": "How It Works"
+    },
+    "features": {
+      "snapAndCook": {
+        "title": "Snap & Cook",
+        "description": "Our cutting-edge computer vision instantly recognizes ingredients in your refrigerator photos, transforming random items into delicious meals you never thought possible."
+      },
+      "deliveryHistory": {
+        "title": "Delivery History Analysis",
+        "description": "Upload your UberEats or food delivery history, and our AI creates healthier, budget-friendly homemade versions of your favorite restaurant meals that taste just as good."
+      },
+      "nutritionalIntelligence": {
+        "title": "Nutritional Intelligence",
+        "description": "Our AI balances taste with nutrition, creating recipes that are both delicious and healthy. Break free from expensive delivery food and cook nutritious meals at home."
+      }
+    },
+    "howItWorks": {
+      "title": "How Recipe AI Works",
+      "step1": {
+        "title": "Upload Photos",
+        "description": "Take photos of your ingredients or refrigerator contents"
+      },
+      "step2": {
+        "title": "AI Analysis",
+        "description": "Our AI identifies ingredients and considers your preferences"
+      },
+      "step3": {
+        "title": "Recipe Generation",
+        "description": "Get personalized recipes based on your ingredients and taste"
+      },
+      "step4": {
+        "title": "Cook & Enjoy",
+        "description": "Follow the recipe and enjoy your delicious meal"
+      }
+    },
+    "testimonials": {
+      "title": "What Our Users Say",
+      "testimonial1": {
+        "name": "Jessica T.",
+        "role": "Home Cook",
+        "quote": "Recipe AI has transformed how I cook. I've cut my food delivery spending by 70% and now make restaurant-quality meals at home with whatever ingredients I have in my fridge!"
+      },
+      "testimonial2": {
+        "name": "Michael R.",
+        "role": "Busy Professional",
+        "quote": "I used to spend a fortune on food delivery that was either expensive and good or cheap and unhealthy. Recipe AI analyzes my UberEats history and creates healthier versions I can make at home in less time than delivery takes!"
+      },
+      "testimonial3": {
+        "name": "Sarah K.",
+        "role": "Food Enthusiast",
+        "quote": "The AI vision technology is incredible - I just snap a photo of my refrigerator and it identifies everything inside, suggesting creative recipes I'd never think of. I'm eating healthier and saving money by cooking at home instead of ordering out."
+      }
+    },
+    "tryItNow": {
+      "title": "Try Recipe AI Now",
+      "uploadPhotos": "Upload photos of ingredients",
+      "uploadButton": "Upload Photos",
+      "uploading": "Uploading...",
+      "createCustomRecipe": "Create Custom Recipe",
+      "noFilesSelected": "Please select at least one file",
+      "selectedFiles": "Selected {count} file{plural}",
+      "uploadSuccess": "Upload successful! AI has identified the following ingredients:",
+      "noIngredientsIdentified": "No ingredients were identified. Try uploading a clearer image.",
+      "generateRecipe": "Generate Recipe with These Ingredients",
+      "generateRecipeAgain": "Generate Recipe Again!",
+      "generatingRecipe": "Generating Recipe..."
+    },
+    "userDashboard": {
+      "kitchenTools": {
+        "title": "Your Kitchen Tools",
+        "manageTools": "Manage Tools",
+        "noData": "No kitchen tools data uploaded yet.",
+        "addTools": "Add Kitchen Tools"
+      },
+      "mealHistory": {
+        "title": "Your Meal History",
+        "manageMeals": "Manage Meals",
+        "noData": "No meal history data uploaded yet.",
+        "addMeals": "Add Meal History"
+      },
+      "generatedRecipes": {
+        "title": "Generated Recipe History",
+        "manageRecipes": "Manage Recipes",
+        "noData": "No generated recipes yet.",
+        "viewHistory": "View Recipe History"
+      }
+    },
+    "footer": {
+      "description": "Transform your kitchen into a culinary studio with AI-powered recipe suggestions tailored to your ingredients and preferences.",
+      "features": "Features",
+      "photoRecognition": "Photo Recognition",
+      "smartRecommendations": "Smart Recommendations",
+      "kitchenToolsTracking": "Kitchen Tools Tracking",
+      "mealHistory": "Meal History",
+      "company": "Company",
+      "aboutUs": "About Us",
+      "contact": "Contact",
+      "careers": "Careers",
+      "blog": "Blog",
+      "legal": "Legal",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "cookiePolicy": "Cookie Policy",
+      "gdpr": "GDPR",
+      "copyright": "© {year} Recipe AI. All rights reserved."
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign In to Recipe AI",
+      "signedOut": "You have been signed out from the demo account.",
+      "signedOutDescription": "To continue using Recipe AI, please sign in with your own account or create a new one.",
+      "googleSignIn": "Sign In with Google",
+      "demoAccount": "Try Demo Account",
+      "demoAccountUnavailable": "Demo Account Unavailable",
+      "or": "OR",
+      "email": "Email",
+      "password": "Password",
+      "emailSignIn": "Sign In with Email",
+      "signingIn": "Signing In...",
+      "noAccount": "Don't have an account? Sign Up",
+      "demoAccountNote": "Demo Account: All changes will be reset on logout"
+    }
+  },
+  "recipeGenerator": {
+    "generatedRecipe": "Generated Recipe",
+    "copyToClipboard": "Copy to clipboard",
+    "recipeCopied": "Recipe copied to clipboard!"
+  },
+  "myKitchenTools": {
+    "title": "My Kitchen Tools",
+    "addTools": "Add Tools",
+    "deleteAll": "Delete All",
+    "noTools": "No kitchen tools added yet. Upload photos of your kitchen tools to get started.",
+    "uploadPhotos": "Upload Photos",
+    "category": "Category",
+    "condition": "Condition",
+    "favorite": "Favorite"
+  },
+  "myMealHistory": {
+    "title": "My Meal History",
+    "addMeal": "Add Meal",
+    "deleteAll": "Delete All",
+    "noMeals": "No meal history added yet. Upload photos of your meals to get started.",
+    "uploadPhotos": "Upload Photos",
+    "restaurant": "Restaurant",
+    "cuisine": "Cuisine",
+    "date": "Date",
+    "dishes": "Dishes",
+    "favorite": "Favorite"
+  },
+  "myGeneratedRecipes": {
+    "title": "My Generated Recipes",
+    "deleteAll": "Delete All",
+    "noRecipes": "No generated recipes yet. Try generating a recipe from your ingredients or meal history.",
+    "generateRecipe": "Generate Recipe",
+    "date": "Date",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "nutritionalInfo": "Nutritional Info",
+    "cookingTime": "Cooking Time",
+    "difficulty": "Difficulty",
+    "cuisine": "Cuisine",
+    "toolsRequired": "Tools Required",
+    "dietaryTags": "Dietary Tags",
+    "favorite": "Favorite"
+  },
+  "modals": {
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "introduction": "Introduction",
+      "introductionText": "Recipe AI (\"we,\" \"our,\" or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share information about you when you use our services.",
+      "informationWeCollect": "Information We Collect",
+      "informationWeCollectText": "We collect information you provide directly to us, such as when you create an account, upload photos, or interact with our services. This may include:",
+      "informationItems": [
+        "Account information (name, email, password)",
+        "Photos of ingredients and food",
+        "Information about your kitchen tools",
+        "Your meal history and preferences"
+      ],
+      "howWeUseYourInformation": "How We Use Your Information",
+      "howWeUseYourInformationText": "We use the information we collect to:",
+      "useItems": [
+        "Provide, maintain, and improve our services",
+        "Generate personalized recipe recommendations",
+        "Analyze your preferences to enhance your experience",
+        "Communicate with you about our services"
+      ],
+      "dataRetention": "Data Retention",
+      "dataRetentionText": "We retain your information for as long as your account is active or as needed to provide you services. You can delete your account at any time.",
+      "contactUs": "Contact Us",
+      "contactUsText": "If you have any questions about this Privacy Policy, please contact us at privacy@recipeai.com."
+    },
+    "termsOfService": {
+      "title": "Terms of Service",
+      "acceptanceOfTerms": "Acceptance of Terms",
+      "acceptanceOfTermsText": "By accessing or using Recipe AI, you agree to be bound by these Terms of Service and all applicable laws and regulations.",
+      "userAccounts": "User Accounts",
+      "userAccountsText": "You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.",
+      "userContent": "User Content",
+      "userContentText": "You retain ownership of any content you upload to Recipe AI. By uploading content, you grant us a license to use, store, and share that content as necessary to provide our services.",
+      "prohibitedActivities": "Prohibited Activities",
+      "prohibitedActivitiesText": "You agree not to:",
+      "prohibitedItems": [
+        "Use our services for any illegal purpose",
+        "Upload harmful or offensive content",
+        "Attempt to gain unauthorized access to our systems",
+        "Interfere with other users' enjoyment of our services"
+      ],
+      "termination": "Termination",
+      "terminationText": "We reserve the right to terminate or suspend your account at our sole discretion, without notice, for conduct that we believe violates these Terms of Service or is harmful to other users of our services, us, or third parties, or for any other reason.",
+      "contactUs": "Contact Us",
+      "contactUsText": "If you have any questions about these Terms of Service, please contact us at terms@recipeai.com."
+    }
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "common": {
+    "appName": "食譜AI",
+    "tagline": "個人化食譜生成平台",
+    "signIn": "登入",
+    "signUp": "註冊",
+    "signOut": "登出",
+    "demoMode": "示範模式",
+    "language": "語言"
+  },
+  "home": {
+    "hero": {
+      "title": "將您的廚房變成烹飪工作室",
+      "subtitle": "食譜AI使用先進的電腦視覺技術分析您冰箱或食材的照片，立即創建您會喜歡的個人化食譜。",
+      "description": "上傳您的外送歷史記錄，我們的AI將設計更健康、自製版本的您最喜愛的餐廳餐點。在高品質外送食品通常太貴，而預算選項缺乏營養的世界中，食譜AI幫助您在家烹飪美味、營養的餐點。",
+      "getStarted": "免費開始使用",
+      "howItWorks": "運作方式"
+    },
+    "features": {
+      "snapAndCook": {
+        "title": "拍照與烹飪",
+        "description": "我們尖端的電腦視覺技術立即識別您冰箱照片中的食材，將隨機物品轉變為您從未想過的美味餐點。"
+      },
+      "deliveryHistory": {
+        "title": "外送歷史分析",
+        "description": "上傳您的UberEats或外送歷史記錄，我們的AI創建更健康、經濟實惠的自製版本，口味與您喜愛的餐廳餐點一樣好。"
+      },
+      "nutritionalIntelligence": {
+        "title": "營養智能",
+        "description": "我們的AI平衡口味與營養，創建既美味又健康的食譜。擺脫昂貴的外送食品，在家烹飪營養餐點。"
+      }
+    },
+    "howItWorks": {
+      "title": "食譜AI如何運作",
+      "step1": {
+        "title": "上傳照片",
+        "description": "拍攝您的食材或冰箱內容物的照片"
+      },
+      "step2": {
+        "title": "AI分析",
+        "description": "我們的AI識別食材並考慮您的偏好"
+      },
+      "step3": {
+        "title": "食譜生成",
+        "description": "獲取基於您的食材和口味的個人化食譜"
+      },
+      "step4": {
+        "title": "烹飪與享用",
+        "description": "按照食譜烹飪並享用您的美味餐點"
+      }
+    },
+    "testimonials": {
+      "title": "用戶評價",
+      "testimonial1": {
+        "name": "張小美",
+        "role": "家庭廚師",
+        "quote": "食譜AI徹底改變了我的烹飪方式。我減少了70%的外送食品支出，現在用冰箱裡的任何食材都能做出餐廳品質的餐點！"
+      },
+      "testimonial2": {
+        "name": "李大偉",
+        "role": "忙碌專業人士",
+        "quote": "我過去常花大錢在外送食品上，要麼貴但好吃，要麼便宜但不健康。食譜AI分析我的UberEats歷史記錄，創建更健康的版本，我在家就能做出來，比等外送還快！"
+      },
+      "testimonial3": {
+        "name": "王美玲",
+        "role": "美食愛好者",
+        "quote": "AI視覺技術真是太神奇了 - 我只需拍一張冰箱的照片，它就能識別裡面的所有東西，推薦我從未想過的創意食譜。我現在吃得更健康，也因為在家烹飪而不是點外賣省下了不少錢。"
+      }
+    },
+    "tryItNow": {
+      "title": "立即試用食譜AI",
+      "uploadPhotos": "上傳食材照片",
+      "uploadButton": "上傳照片",
+      "uploading": "上傳中...",
+      "createCustomRecipe": "創建自定義食譜",
+      "noFilesSelected": "請選擇至少一個檔案",
+      "selectedFiles": "已選擇 {count} 個檔案",
+      "uploadSuccess": "上傳成功！AI已識別以下食材：",
+      "noIngredientsIdentified": "未識別到食材。請嘗試上傳更清晰的圖片。",
+      "generateRecipe": "使用這些食材生成食譜",
+      "generateRecipeAgain": "再次生成食譜！",
+      "generatingRecipe": "正在生成食譜..."
+    },
+    "userDashboard": {
+      "kitchenTools": {
+        "title": "您的廚房工具",
+        "manageTools": "管理工具",
+        "noData": "尚未上傳廚房工具數據。",
+        "addTools": "添加廚房工具"
+      },
+      "mealHistory": {
+        "title": "您的用餐歷史",
+        "manageMeals": "管理餐點",
+        "noData": "尚未上傳用餐歷史數據。",
+        "addMeals": "添加用餐歷史"
+      },
+      "generatedRecipes": {
+        "title": "已生成的食譜歷史",
+        "manageRecipes": "管理食譜",
+        "noData": "尚未生成食譜。",
+        "viewHistory": "查看食譜歷史"
+      }
+    },
+    "footer": {
+      "description": "通過AI驅動的食譜建議，將您的廚房變成烹飪工作室，這些建議根據您的食材和偏好量身定制。",
+      "features": "功能",
+      "photoRecognition": "照片識別",
+      "smartRecommendations": "智能推薦",
+      "kitchenToolsTracking": "廚房工具追蹤",
+      "mealHistory": "用餐歷史",
+      "company": "公司",
+      "aboutUs": "關於我們",
+      "contact": "聯繫我們",
+      "careers": "職業機會",
+      "blog": "部落格",
+      "legal": "法律",
+      "privacyPolicy": "隱私政策",
+      "termsOfService": "服務條款",
+      "cookiePolicy": "Cookie政策",
+      "gdpr": "GDPR",
+      "copyright": "© {year} 食譜AI。保留所有權利。"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "登入食譜AI",
+      "signedOut": "您已從示範帳戶登出。",
+      "signedOutDescription": "要繼續使用食譜AI，請使用您自己的帳戶登入或創建一個新帳戶。",
+      "googleSignIn": "使用Google登入",
+      "demoAccount": "試用示範帳戶",
+      "demoAccountUnavailable": "示範帳戶不可用",
+      "or": "或",
+      "email": "電子郵件",
+      "password": "密碼",
+      "emailSignIn": "使用電子郵件登入",
+      "signingIn": "登入中...",
+      "noAccount": "沒有帳戶？註冊",
+      "demoAccountNote": "示範帳戶：所有更改將在登出時重置"
+    }
+  },
+  "recipeGenerator": {
+    "generatedRecipe": "已生成的食譜",
+    "copyToClipboard": "複製到剪貼板",
+    "recipeCopied": "食譜已複製到剪貼板！"
+  },
+  "myKitchenTools": {
+    "title": "我的廚房工具",
+    "addTools": "添加工具",
+    "deleteAll": "刪除全部",
+    "noTools": "尚未添加廚房工具。上傳您的廚房工具照片開始使用。",
+    "uploadPhotos": "上傳照片",
+    "category": "類別",
+    "condition": "狀態",
+    "favorite": "收藏"
+  },
+  "myMealHistory": {
+    "title": "我的用餐歷史",
+    "addMeal": "添加餐點",
+    "deleteAll": "刪除全部",
+    "noMeals": "尚未添加用餐歷史。上傳您的餐點照片開始使用。",
+    "uploadPhotos": "上傳照片",
+    "restaurant": "餐廳",
+    "cuisine": "菜系",
+    "date": "日期",
+    "dishes": "菜品",
+    "favorite": "收藏"
+  },
+  "myGeneratedRecipes": {
+    "title": "我的已生成食譜",
+    "deleteAll": "刪除全部",
+    "noRecipes": "尚未生成食譜。嘗試從您的食材或用餐歷史生成食譜。",
+    "generateRecipe": "生成食譜",
+    "date": "日期",
+    "ingredients": "食材",
+    "instructions": "烹飪步驟",
+    "nutritionalInfo": "營養信息",
+    "cookingTime": "烹飪時間",
+    "difficulty": "難度",
+    "cuisine": "菜系",
+    "toolsRequired": "所需工具",
+    "dietaryTags": "飲食標籤",
+    "favorite": "收藏"
+  },
+  "modals": {
+    "privacyPolicy": {
+      "title": "隱私政策",
+      "introduction": "簡介",
+      "introductionText": "食譜AI（「我們」、「我們的」或「我們」）致力於保護您的隱私。本隱私政策解釋了我們如何在您使用我們的服務時收集、使用和分享有關您的信息。",
+      "informationWeCollect": "我們收集的信息",
+      "informationWeCollectText": "我們收集您直接提供給我們的信息，例如當您創建帳戶、上傳照片或與我們的服務互動時。這可能包括：",
+      "informationItems": [
+        "帳戶信息（姓名、電子郵件、密碼）",
+        "食材和食物的照片",
+        "關於您廚房工具的信息",
+        "您的用餐歷史和偏好"
+      ],
+      "howWeUseYourInformation": "我們如何使用您的信息",
+      "howWeUseYourInformationText": "我們使用收集的信息來：",
+      "useItems": [
+        "提供、維護和改進我們的服務",
+        "生成個人化的食譜推薦",
+        "分析您的偏好以增強您的體驗",
+        "與您溝通有關我們的服務"
+      ],
+      "dataRetention": "數據保留",
+      "dataRetentionText": "我們保留您的信息，只要您的帳戶處於活動狀態或需要為您提供服務。您可以隨時刪除您的帳戶。",
+      "contactUs": "聯繫我們",
+      "contactUsText": "如果您對本隱私政策有任何疑問，請通過privacy@recipeai.com聯繫我們。"
+    },
+    "termsOfService": {
+      "title": "服務條款",
+      "acceptanceOfTerms": "接受條款",
+      "acceptanceOfTermsText": "通過訪問或使用食譜AI，您同意受這些服務條款和所有適用法律法規的約束。",
+      "userAccounts": "用戶帳戶",
+      "userAccountsText": "您負責維護您的帳戶信息的機密性，並對您帳戶下發生的所有活動負責。",
+      "userContent": "用戶內容",
+      "userContentText": "您保留您上傳到食譜AI的任何內容的所有權。通過上傳內容，您授予我們許可使用、存儲和分享該內容，以便提供我們的服務。",
+      "prohibitedActivities": "禁止活動",
+      "prohibitedActivitiesText": "您同意不：",
+      "prohibitedItems": [
+        "將我們的服務用於任何非法目的",
+        "上傳有害或冒犯性內容",
+        "嘗試未經授權訪問我們的系統",
+        "干擾其他用戶對我們服務的享用"
+      ],
+      "termination": "終止",
+      "terminationText": "我們保留權利，可自行決定終止或暫停您的帳戶，無需通知，如果我們認為您的行為違反了這些服務條款或對我們服務的其他用戶、我們或第三方有害，或出於任何其他原因。",
+      "contactUs": "聯繫我們",
+      "contactUsText": "如果您對這些服務條款有任何疑問，請通過terms@recipeai.com聯繫我們。"
+    }
+  }
+}
