@@ -235,8 +235,17 @@ export async function DELETE(request: NextRequest) {
       // Continue even if metadata deletion fails
     }
 
-    // We don't delete the actual generated recipe entry, just the metadata
-    // This preserves the original data while allowing the user to hide it from their view
+    // Also delete the actual generated recipe entry
+    const { error: recipeError } = await supabase
+      .from('generated_recipes')
+      .delete()
+      .eq('user_id', userId)
+      .eq('id', recipeId);
+
+    if (recipeError) {
+      console.error('Error deleting generated recipe:', recipeError);
+      return NextResponse.json({ error: recipeError.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       message: 'Recipe deleted successfully'

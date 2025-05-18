@@ -199,6 +199,43 @@ export default function MyGeneratedRecipesPage() {
     }
   };
 
+  const handleDeleteAllRecipes = async () => {
+    // Confirm with the user before deleting all recipes
+    if (!confirm('Are you sure you want to delete ALL generated recipes? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      // Get the current user's session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+      
+      // Call the delete-all API endpoint
+      const response = await fetch('/api/user/generated-recipes/delete-all', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete all recipes');
+      }
+      
+      // Clear the local state
+      setRecipes([]);
+      
+      // Show success message
+      alert('All generated recipes have been deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting all recipes:', error);
+      alert('Failed to delete all recipes. Please try again.');
+    }
+  };
+
   // Filter recipes based on search term and filter selection
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = 
@@ -267,13 +304,20 @@ export default function MyGeneratedRecipesPage() {
             </select>
           </div>
           
-          <div className="w-full md:w-1/3 flex justify-end items-end">
+          <div className="w-full md:w-1/3 flex justify-end items-end gap-2">
             <a
               href="/recipe-generator"
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
             >
               Generate New Recipe
             </a>
+            <button
+              onClick={handleDeleteAllRecipes}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+              title="Delete all generated recipes"
+            >
+              Delete All
+            </button>
           </div>
         </div>
       </div>
